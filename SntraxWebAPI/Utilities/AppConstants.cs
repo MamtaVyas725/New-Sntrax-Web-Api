@@ -23,6 +23,7 @@
         public static string DBPRIMARY = "PRIMARY";
         public static string DBSECONDARY = "SECONDARY";
         public static string SP_INT_IBASE_GET_DN = "sp_int_IBase_get_dn";
+        public static string SP_INT_IBASE_GET_SN = "sp_int_IBase_get_sn";
 
     }
 }

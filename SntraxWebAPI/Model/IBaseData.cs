@@ -65,9 +65,14 @@ namespace SntraxWebAPI.Model
         public string _xmlnssoap { get; set; }
     }
 
-    public class IBaseDataList
+    public class IBaseDNList
     {
         public string DN { get; set; }
+    }
+
+    public class IBaseSNList
+    {
+        public string sn { get; set; }
     }
 
     public class IBaseGetDataByDN
@@ -77,8 +82,13 @@ namespace SntraxWebAPI.Model
 
     public class List
     {
-        public List<IBaseDataList> IBaseData { get; set; }
+        public List<IBaseDNList> DN { get; set; }
     }
+
+    public class IBaseGetSingleData
+    {
+        public string sn { get; set; }
+    }  
 
     public class Root
     {
