@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using System.Xml.Serialization;
 using System.IO;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace SntraxWebAPI.Controllers
 {
