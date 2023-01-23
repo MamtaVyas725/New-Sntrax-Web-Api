@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using System.Xml.Serialization;
 using System.IO;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace SntraxWebAPI.Controllers
 {
@@ -33,9 +34,11 @@ namespace SntraxWebAPI.Controllers
         private string _emailRecipent = string.Empty;
         private string _emailSender = string.Empty;
         private string _outerDNXML = string.Empty;
+        private string _EIMRmaXML = string.Empty;
+        private string _eIMRmaXML = string.Empty;
         private static int dbSuccess = -1;
 
-
+        private SntraxService sntraxService;
 
 
         public SntraxServiceController()
@@ -55,7 +58,9 @@ namespace SntraxWebAPI.Controllers
             _emailRecipent = _rootObjectCommon.GetValue<string>("EmailConfiguration:emailRecipent");
             _emailSender = _rootObjectCommon.GetValue<string>("EmailConfiguration:emailSender");
             _outerDNXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:OuterXML");
+            _eIMRmaXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:EIMRmaXML");
             CLogger._logger = _logger;
+            sntraxService = new SntraxService();
         }
 
 
@@ -77,7 +82,7 @@ namespace SntraxWebAPI.Controllers
             var IBaseDataDNList = myDeserializedClass.list.IBaseData.ToList();
             List<IBaseData>returnList = new List<IBaseData>();
             string dnString = "";
-            SntraxService sntraxService = new SntraxService();
+            
             List<IBaseData> IBaseData = new List<IBaseData>();
             if (IBaseDataDNList != null && IBaseDataDNList.Count > 0)
             {
@@ -125,11 +130,41 @@ namespace SntraxWebAPI.Controllers
         }
 
         [HttpPost]
+        [Consumes("application/xml")]
         [Route("get_EIMRma")]
-        public shipData get_EIMRma(string strSN)
+        public string get_EIMRma(XmlDocument doc)
         {
-            shipData ship = new shipData();
-            return ship;
+            string methodName = "IBaseGetDataByDN";
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            string sDBName = string.Empty;
+            string FinalEIMRmaXml = string.Empty;
+            List<GetEIMRmaResult> getEIMRmaResult = new List<GetEIMRmaResult>();
+            
+            try
+            {
+                var soapBody = doc.GetElementsByTagName("strSN")[0];
+                string SerialNumber = soapBody.InnerXml;
+                // Test DB Connection with Retry
+                dbSuccess = Repo.ConnectToRetry(ref sDBName, _dbRetry);
+                DataSet dataSet = new DataSet();
+                SqlParameter[] param = {
+                           new SqlParameter("@sn",SerialNumber),
+                          };
+                dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_IN_EIM_GET_SHIPRMA_DATA, param);
+                getEIMRmaResult = sntraxService.getEIMRmaResult(dataSet, SerialNumber);
+                string stringwriter = sntraxService.Serialize(getEIMRmaResult);
+                FinalEIMRmaXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter));
+
+            }
+            catch (Exception ex)
+            {
+                CLogger.LogInfo(methodName + " exception : " + ex.Message);
+            }
+            stopwatch.Stop();
+            CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
+
+            return FinalEIMRmaXml;
         }
 
         [HttpPost]
