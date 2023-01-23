@@ -18,7 +18,6 @@ using Newtonsoft.Json;
 using System.Xml.Serialization;
 using System.IO;
 using Newtonsoft.Json.Linq;
-using System;
 
 namespace SntraxWebAPI.Controllers
 {
@@ -79,7 +78,7 @@ namespace SntraxWebAPI.Controllers
             string innerObject = soapBody.InnerXml;
             var myJsonResponse = Repo.XmlToJson(innerObject);
             IBaseGetDataByDN myDeserializedClass = JsonConvert.DeserializeObject<IBaseGetDataByDN>(myJsonResponse);
-            var IBaseDataDNList = myDeserializedClass.list.IBaseData.ToList();
+            var IBaseDataDNList = myDeserializedClass.list.DN.ToList();
             List<IBaseData>returnList = new List<IBaseData>();
             string dnString = "";
             
@@ -114,11 +113,49 @@ namespace SntraxWebAPI.Controllers
         }
 
         [HttpPost]
+        [Consumes("application/xml")]
         [Route("IBaseGetSingleData")]
-        public List<IBaseData> IBaseGetSingleData(List<IBaseData> list)
+        public string IBaseGetSingleData(XmlDocument doc)
         {
+            string methodName = "IBaseGetSingleData";
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            string sDBName = string.Empty;
+            string stringwriter = string.Empty;
+            string FinalDNXml = string.Empty;
+            var soapBody = doc.GetElementsByTagName("IBaseGetSingleData")[0];
+            string innerObject = soapBody.InnerText;
+            string snString = Regex.Replace(innerObject, @"\s+", string.Empty);
+            //var myJsonResponse = Repo.XmlToJson(innerObject);
+            //IBaseGetSingleData myDeserializedClass = JsonConvert.DeserializeObject<IBaseGetSingleData>(myJsonResponse);
+            //var snString = myDeserializedClass.sn;
+            List<IBaseData> returnList = new List<IBaseData>();
+            SntraxService sntraxService = new SntraxService();
             List<IBaseData> IBaseData = new List<IBaseData>();
-            return IBaseData;
+                      
+            if (snString != "")
+            {
+                try
+                {
+                    // Test DB Connection with Retry
+                    dbSuccess = Repo.ConnectToRetry(ref sDBName, _dbRetry);
+                    DataSet dataSet = new DataSet();
+                    SqlParameter[] param = {
+                           new SqlParameter("@param_sn",snString),
+                          };
+                    dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_INT_IBASE_GET_SN, param);
+                    returnList = sntraxService.getIbaseData(dataSet, false);
+                    stringwriter = sntraxService.Serialize(returnList);
+                    FinalDNXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter));
+                }
+                catch (Exception ex)
+                {
+                    CLogger.LogInfo(methodName + " exception : " + ex.Message);
+                }
+                stopwatch.Stop();
+                CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
+            }
+            return FinalDNXml;
         }
 
         [HttpPost]
