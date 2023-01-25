@@ -25,6 +25,14 @@
         public static string SP_INT_IBASE_GET_DN = "sp_int_IBase_get_dn";
         public static string SP_INT_IBASE_GET_SN = "sp_int_IBase_get_sn";
         public static string SP_IN_EIM_GET_SHIPRMA_DATA = "sntrax_current..sp_in_eim_get_shiprma_data";
+        public static string SP_IN_SSD_GET_SHIPTORESULT = "sntrax_current..sp_in_ssd_get_shiptoresult";
+
+        public static string DBRETRY = "2";
+        public static string EMAIL_RECIPENT = "juhix.anjarlekar@intel.com";
+        public static string EMAIL_SENDER = "sntrax@intel.com;";
+        public static string EMAIL_SERVER = "png-out.intel.com";
+        public static string DB_MAX_TIMEOUT = "60";
+
 
     }
 }

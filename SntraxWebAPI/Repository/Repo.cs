@@ -74,7 +74,7 @@ namespace SntraxWebAPI.Repository
                     cmd.Connection = conn;
                     cmd.CommandText = procedureName;
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandTimeout = 0;
+                    cmd.CommandTimeout = procedureName == AppConstants.SP_IN_SSD_GET_SHIPTORESULT ? Convert.ToInt32(AppConstants.DB_MAX_TIMEOUT) : 0;
                     cmd.Parameters.Clear();
                     if (commandParameters != null)
                     {

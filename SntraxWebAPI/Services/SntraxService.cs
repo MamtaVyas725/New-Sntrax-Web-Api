@@ -98,11 +98,24 @@ namespace SntraxWebAPI.Services
         }
 
 
-        public string ReplaceXmlTag(string xmlstring)
+        public string ReplaceXmlTag(string xmlstring, string methodName)
         {
-            string returnXmlstring = string.Empty; ;
-            returnXmlstring = xmlstring.ToString().Replace("<ArrayOfIBaseData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfIBaseData>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
-            returnXmlstring = returnXmlstring.ToString().Replace("<ArrayOfGetEIMRmaResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfGetEIMRmaResult>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+            string returnXmlstring = string.Empty;
+            if (methodName == "get_EIMRma" || methodName == "IBaseGetDataByDN") //Mamta - change this if() as per your needs
+            {
+                returnXmlstring = xmlstring.ToString().Replace("<ArrayOfIBaseData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfIBaseData>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+                returnXmlstring = returnXmlstring.ToString().Replace("<ArrayOfGetEIMRmaResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfGetEIMRmaResult>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+
+            }
+            if (methodName == "IBaseGetSingleData")
+            {
+                returnXmlstring = xmlstring.ToString().Replace("<ArrayOfIBaseData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<IBaseGetSingleDataResult>").Replace("</ArrayOfIBaseData>", "</IBaseGetSingleDataResult>").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+            }
+            if (methodName == "Validate_SSD_CPU_ShipTo")
+            {
+                returnXmlstring = xmlstring.ToString().Replace("<ShipToResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<Validate_SSD_CPU_ShipToResult>").Replace("</ShipToResult>", "</Validate_SSD_CPU_ShipToResult>").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+            }
+
             return returnXmlstring.ToString();
         }
 
@@ -153,6 +166,38 @@ namespace SntraxWebAPI.Services
             }
 
             return getEIMRmaList;
+        }
+
+        public ShipToResult GetShippingDetails(DataSet dataSet)
+        {
+            ShipToResult shipResult = new()
+            {
+                RecordFound = 0 //default or record not found
+            };
+            try
+            {
+                if (dataSet.Tables.Count > 0)
+                {
+                    DataTable dtCustomerDetails = new();
+                    dtCustomerDetails = dataSet.Tables[0];
+                    shipResult.RecordFound = 1; //record found
+                    shipResult.ProductCode = (dtCustomerDetails.Rows[0].Field<string>(0) ?? "");
+                    shipResult.ShippingDate = (dtCustomerDetails.Rows[0].Field<string>(1) ?? "");
+                    shipResult.FERT = (dtCustomerDetails.Rows[0].Field<string>(2) ?? "");
+                    shipResult.CustomerID = (dtCustomerDetails.Rows[0].Field<string>(3) ?? "");
+                    shipResult.CustomerName = (dtCustomerDetails.Rows[0].Field<string>(4) ?? "");
+                    shipResult.WarrantyExpire = (dtCustomerDetails.Rows[0].Field<string>(5) ?? "");
+                    shipResult.CustomerRegion = (dtCustomerDetails.Rows[0].Field<string>(6) ?? "");
+
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return shipResult;
+
         }
     }
 }
