@@ -99,11 +99,24 @@ namespace SntraxWebAPI.Services
         }
 
 
-        public string ReplaceXmlTag(string xmlstring)
+        public string ReplaceXmlTag(string xmlstring, string methodName)
         {
-            string returnXmlstring = string.Empty; ;
-            returnXmlstring = xmlstring.ToString().Replace("<ArrayOfIBaseData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfIBaseData>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
-            returnXmlstring = returnXmlstring.ToString().Replace("<ArrayOfGetEIMRmaResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfGetEIMRmaResult>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+            string returnXmlstring = string.Empty;
+            if (methodName == "get_EIMRma" || methodName == "IBaseGetDataByDN") //Mamta - change this if() as per your needs
+            {
+                returnXmlstring = xmlstring.ToString().Replace("<ArrayOfIBaseData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfIBaseData>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+                returnXmlstring = returnXmlstring.ToString().Replace("<ArrayOfGetEIMRmaResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfGetEIMRmaResult>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+
+            }
+            if (methodName == "IBaseGetSingleData")
+            {
+                returnXmlstring = xmlstring.ToString().Replace("<ArrayOfIBaseData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<IBaseGetSingleDataResult>").Replace("</ArrayOfIBaseData>", "</IBaseGetSingleDataResult>").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+            }
+            if (methodName == "Validate_SSD_CPU_ShipTo")
+            {
+                returnXmlstring = xmlstring.ToString().Replace("<ShipToResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<Validate_SSD_CPU_ShipToResult>").Replace("</ShipToResult>", "</Validate_SSD_CPU_ShipToResult>").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+            }
+
             return returnXmlstring.ToString();
         }
 

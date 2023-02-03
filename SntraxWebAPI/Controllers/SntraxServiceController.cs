@@ -109,11 +109,10 @@ namespace SntraxWebAPI.Controllers
                         SqlParameter[] param = {
                            new SqlParameter("@param_dn",dnString),
                           };
-                        dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_INT_IBASE_GET_DN, param);
-                        returnList = sntraxService.getIbaseData(dataSet, true);
-                        stringwriter = sntraxService.Serialize(returnList);
-                        FinalDNXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter,""));
-                    }
+                    dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_INT_IBASE_GET_DN, param);
+                    returnList = sntraxService.getIbaseData(dataSet, true);
+                    stringwriter = sntraxService.Serialize(returnList);
+                    FinalDNXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter,""));
                 }
                 catch (Exception ex)
                 {
@@ -142,7 +141,7 @@ namespace SntraxWebAPI.Controllers
         
             SntraxService sntraxService = new SntraxService();
             List<IBaseData> IBaseData = new List<IBaseData>();
-
+                      
             if (snString != "")
             {
                 try
@@ -225,26 +224,26 @@ namespace SntraxWebAPI.Controllers
             return FinalDNXml;
         }
 
-[HttpPost]
-[Consumes("application/xml")]
-[Route("get_EIMRma")]
-public string get_EIMRma(XmlDocument doc)
-{
-    string methodName = "IBaseGetDataByDN";
-    Stopwatch stopwatch = new Stopwatch();
-    stopwatch.Start();
-    string sDBName = string.Empty;
-    string FinalEIMRmaXml = string.Empty;
-    List<GetEIMRmaResult> getEIMRmaResult = new List<GetEIMRmaResult>();
-
-    try
-    {
-        var soapBody = doc.GetElementsByTagName("strSN")[0];
-        string SerialNumber = soapBody.InnerXml;
-        // Test DB Connection with Retry
-        dbSuccess = Repo.ConnectToRetry(ref sDBName, _dbRetry);
-        DataSet dataSet = new DataSet();
-        SqlParameter[] param = {
+        [HttpPost]
+        [Consumes("application/xml")]
+        [Route("get_EIMRma")]
+        public string get_EIMRma(XmlDocument doc)
+        {
+            string methodName = "IBaseGetDataByDN";
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            string sDBName = string.Empty;
+            string FinalEIMRmaXml = string.Empty;
+            List<GetEIMRmaResult> getEIMRmaResult = new List<GetEIMRmaResult>();
+            
+            try
+            {
+                var soapBody = doc.GetElementsByTagName("strSN")[0];
+                string SerialNumber = soapBody.InnerXml;
+                // Test DB Connection with Retry
+                dbSuccess = Repo.ConnectToRetry(ref sDBName, _dbRetry);
+                DataSet dataSet = new DataSet();
+                SqlParameter[] param = {
                            new SqlParameter("@sn",SerialNumber),
                           };
         dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_IN_EIM_GET_SHIPRMA_DATA, param);
@@ -299,7 +298,7 @@ public string get_EIMRma(XmlDocument doc)
                             _msg = sntraxService.validateSNv6(_SNv6);
                             if (!_msg.Equals(""))
                                 _hasError = '1';
-                            foreach(Components _component in _SNv6.ComponentList.Component)
+                            foreach (Components _component in _SNv6.ComponentList.Component)
                             {
                                 _comp_msg += sntraxService.validateSNv6_comp(_component);
                                 if (!string.IsNullOrWhiteSpace(_comp_msg) && _hasError == '0')
@@ -343,7 +342,7 @@ public string get_EIMRma(XmlDocument doc)
                         //Assign _SNv6 to return variables
                         _rtnSNv6 = _SNv6;
                         //_rtnSNv6._status = _hasError.ToString();
-                       // _rtnSNv6._msg = _msg;
+                        // _rtnSNv6._msg = _msg;
 
                         //Temp component list
                         List<Components> tempComp = new List<Components>();
@@ -380,7 +379,7 @@ public string get_EIMRma(XmlDocument doc)
                                 new SqlParameter("@hasError", _hasError),
                                 new SqlParameter("@msg", ""),
                             };
-                              Repo.ExecuteNonQuery(sDBName, AppConstants.SP_INT_WS_INSERT_BUILD_UPLOAD, param);
+                                Repo.ExecuteNonQuery(sDBName, AppConstants.SP_INT_WS_INSERT_BUILD_UPLOAD, param);
                             }
                             catch (Exception eX)
                             {
@@ -410,9 +409,10 @@ public string get_EIMRma(XmlDocument doc)
             }
 
             stringwriter = sntraxService.Serialize(_rtnList);
-            var FinalDNXml1 = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter,""));
+            var FinalDNXml1 = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter, ""));
             return FinalDNXml1;
         }
+
 
 
 
@@ -455,7 +455,7 @@ public string get_EIMRma(XmlDocument doc)
                         dataTable = Repo.GetDataTable(sDBName, AppConstants.SPGET_R4C_SNTRAX_ORCHS_SEARCH_BYSN, param);
                         returnList = sntraxService.getDataByMultipleSN(dataTable, true);
                         stringwriter = sntraxService.Serialize(returnList);
-                        FinalDNXml = string.Format(_multipleSNXML, sntraxService.ReplaceXmlTag(stringwriter,""));
+                        FinalDNXml = string.Format(_multipleSNXML, sntraxService.ReplaceXmlTag(stringwriter, ""));
                     }
                 }
                 catch (Exception ex)
@@ -469,4 +469,5 @@ public string get_EIMRma(XmlDocument doc)
         }
 
     }
+}
 }
