@@ -19,6 +19,7 @@ using System.Xml.Serialization;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
+using SntraxWebAPI.Utilities;
 
 namespace SntraxWebAPI.Controllers
 {
@@ -33,9 +34,12 @@ namespace SntraxWebAPI.Controllers
         private string _dbRetry = string.Empty;
         private string _emailRecipent = string.Empty;
         private string _emailSender = string.Empty;
-        private string _outerDNXML = string.Empty;
+        private string _DNXML = string.Empty;
         private string _EIMRmaXML = string.Empty;
         private string _eIMRmaXML = string.Empty;
+        private string _outerDNXML = string.Empty;
+        private string _validate_SSD_CPU_ShipToResponseOuterXML = string.Empty;
+        private string _iBaseGetSingleDataXML = string.Empty;
         private string _multipleSNXML = string.Empty;
         private static int dbSuccess = -1;
 
@@ -61,6 +65,9 @@ namespace SntraxWebAPI.Controllers
             _outerDNXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:OuterXML");
             _eIMRmaXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:EIMRmaXML");
             _multipleSNXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:MultipleSNXML");
+            _DNXML = _rootObjectCommon.GetValue<string>("OuterXml:DNXML");
+            _iBaseGetSingleDataXML = _rootObjectCommon.GetValue<string>("OuterXML:IBaseGetSingleDataXML");
+            _validate_SSD_CPU_ShipToResponseOuterXML = _rootObjectCommon.GetValue<string>("OuterXml:Validate_SSD_CPU_ShipToResponseXML");
             CLogger._logger = _logger;
             sntraxService = new SntraxService();
         }
@@ -105,7 +112,7 @@ namespace SntraxWebAPI.Controllers
                         dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_INT_IBASE_GET_DN, param);
                         returnList = sntraxService.getIbaseData(dataSet, true);
                         stringwriter = sntraxService.Serialize(returnList);
-                        FinalDNXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter));
+                        FinalDNXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter,""));
                     }
                 }
                 catch (Exception ex)
@@ -128,14 +135,11 @@ namespace SntraxWebAPI.Controllers
             stopwatch.Start();
             string sDBName = string.Empty;
             string stringwriter = string.Empty;
-            string FinalDNXml = string.Empty;
+            string FinalDNXml = string.Empty;            
             var soapBody = doc.GetElementsByTagName("IBaseGetSingleData")[0];
             string innerObject = soapBody.InnerText;
             string snString = Regex.Replace(innerObject, @"\s+", string.Empty);
-            //var myJsonResponse = Repo.XmlToJson(innerObject);
-            //IBaseGetSingleData myDeserializedClass = JsonConvert.DeserializeObject<IBaseGetSingleData>(myJsonResponse);
-            //var snString = myDeserializedClass.sn;
-            List<IBaseData> returnList = new List<IBaseData>();
+        
             SntraxService sntraxService = new SntraxService();
             List<IBaseData> IBaseData = new List<IBaseData>();
 
@@ -150,9 +154,9 @@ namespace SntraxWebAPI.Controllers
                            new SqlParameter("@param_sn",snString),
                           };
                     dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_INT_IBASE_GET_SN, param);
-                    returnList = sntraxService.getIbaseData(dataSet, false);
-                    stringwriter = sntraxService.Serialize(returnList);
-                    FinalDNXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter));
+                    List<IBaseData> iBaseList = sntraxService.getIbaseData(dataSet, false);
+                    stringwriter = sntraxService.Serialize(iBaseList);
+                    FinalDNXml = string.Format(_iBaseGetSingleDataXML, sntraxService.ReplaceXmlTag(stringwriter, "IBaseGetSingleData"));
                 }
                 catch (Exception ex)
                 {
@@ -165,50 +169,99 @@ namespace SntraxWebAPI.Controllers
         }
 
         [HttpPost]
-        [Route("Validate_SSD_CPU_ShipTo")]
-        public ShipToResult Validate_SSD_CPU_ShipTo(string RequestType, string RequestValue)
-        {
-            ShipToResult shipResult = new ShipToResult();
-            return shipResult;
-        }
-
-        [HttpPost]
         [Consumes("application/xml")]
-        [Route("get_EIMRma")]
-        public string get_EIMRma(XmlDocument doc)
+        [Route("Validate_SSD_CPU_ShipTo")]
+        [ResponseCache(Duration = 30)]
+        public string Validate_SSD_CPU_ShipTo(string RequestType, string RequestValue)
         {
-            string methodName = "IBaseGetDataByDN";
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            ShipToResult result = new ShipToResult();
             string sDBName = string.Empty;
-            string FinalEIMRmaXml = string.Empty;
-            List<GetEIMRmaResult> getEIMRmaResult = new List<GetEIMRmaResult>();
+            string stringwriter = string.Empty;
+            string FinalDNXml = string.Empty;
 
             try
             {
-                var soapBody = doc.GetElementsByTagName("strSN")[0];
-                string SerialNumber = soapBody.InnerXml;
                 // Test DB Connection with Retry
                 dbSuccess = Repo.ConnectToRetry(ref sDBName, _dbRetry);
+
+                ////Collin WW14.3-2015: Make sure RequestType and RequestValue is not null
+                RequestType = RequestType == null ? "1" : RequestType;
+                RequestValue = RequestValue == null ? "" : RequestValue;
+                ////Collin WW14.3-2015: Assign a default value for RequestType
+                if (RequestType.Trim() != "0" && RequestType.Trim() != "1")
+                    RequestType = "1";
+
                 DataSet dataSet = new DataSet();
                 SqlParameter[] param = {
+                           new SqlParameter("@type", RequestType),
+                            new SqlParameter("@value", RequestValue),
+                          };
+
+
+                if (RequestValue.Trim() != "")
+                {
+                    if (dbSuccess == 0)
+                    {
+
+                        dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_IN_SSD_GET_SHIPTORESULT, param);
+                        result = sntraxService.GetShippingDetails(dataSet);
+                        stringwriter = sntraxService.Serialize(result);
+                        FinalDNXml = string.Format(_validate_SSD_CPU_ShipToResponseOuterXML, sntraxService.ReplaceXmlTag(stringwriter, "Validate_SSD_CPU_ShipTo"));
+                    }
+                    else
+                    {
+                        //if db connection failed 
+                        result.RecordFound = 2;
+                    }
+                }
+
+            }
+            catch (Exception eX)
+            {
+                SendMail sm = new SendMail("Validate_SSD_CPU_ShipTo", Environment.MachineName);
+                sm.SendEmail(eX.Message.ToString());
+                result.RecordFound = 2;
+            }
+            return FinalDNXml;
+        }
+
+[HttpPost]
+[Consumes("application/xml")]
+[Route("get_EIMRma")]
+public string get_EIMRma(XmlDocument doc)
+{
+    string methodName = "IBaseGetDataByDN";
+    Stopwatch stopwatch = new Stopwatch();
+    stopwatch.Start();
+    string sDBName = string.Empty;
+    string FinalEIMRmaXml = string.Empty;
+    List<GetEIMRmaResult> getEIMRmaResult = new List<GetEIMRmaResult>();
+
+    try
+    {
+        var soapBody = doc.GetElementsByTagName("strSN")[0];
+        string SerialNumber = soapBody.InnerXml;
+        // Test DB Connection with Retry
+        dbSuccess = Repo.ConnectToRetry(ref sDBName, _dbRetry);
+        DataSet dataSet = new DataSet();
+        SqlParameter[] param = {
                            new SqlParameter("@sn",SerialNumber),
                           };
-                dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_IN_EIM_GET_SHIPRMA_DATA, param);
-                getEIMRmaResult = sntraxService.getEIMRmaResult(dataSet, SerialNumber);
-                string stringwriter = sntraxService.Serialize(getEIMRmaResult);
-                FinalEIMRmaXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter));
+        dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_IN_EIM_GET_SHIPRMA_DATA, param);
+        getEIMRmaResult = sntraxService.getEIMRmaResult(dataSet, SerialNumber);
+        string stringwriter = sntraxService.Serialize(getEIMRmaResult);
+        FinalEIMRmaXml = string.Format(_DNXML, sntraxService.ReplaceXmlTag(stringwriter, "get_EIMRma"));
 
-            }
-            catch (Exception ex)
-            {
-                CLogger.LogInfo(methodName + " exception : " + ex.Message);
-            }
-            stopwatch.Stop();
-            CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
+    }
+    catch (Exception ex)
+    {
+        CLogger.LogInfo(methodName + " exception : " + ex.Message);
+    }
+    stopwatch.Stop();
+    CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
 
-            return FinalEIMRmaXml;
-        }
+    return FinalEIMRmaXml;
+}
 
         [HttpPost]
         [Consumes("application/xml")]
@@ -357,7 +410,7 @@ namespace SntraxWebAPI.Controllers
             }
 
             stringwriter = sntraxService.Serialize(_rtnList);
-            var FinalDNXml1 = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter));
+            var FinalDNXml1 = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter,""));
             return FinalDNXml1;
         }
 
@@ -402,7 +455,7 @@ namespace SntraxWebAPI.Controllers
                         dataTable = Repo.GetDataTable(sDBName, AppConstants.SPGET_R4C_SNTRAX_ORCHS_SEARCH_BYSN, param);
                         returnList = sntraxService.getDataByMultipleSN(dataTable, true);
                         stringwriter = sntraxService.Serialize(returnList);
-                        FinalDNXml = string.Format(_multipleSNXML, sntraxService.ReplaceXmlTag(stringwriter));
+                        FinalDNXml = string.Format(_multipleSNXML, sntraxService.ReplaceXmlTag(stringwriter,""));
                     }
                 }
                 catch (Exception ex)
