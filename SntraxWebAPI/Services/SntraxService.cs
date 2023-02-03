@@ -1,6 +1,7 @@
 ﻿using EnttlOrchestrationLayer.Utilities;
 using SntraxWebAPI.Model;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
@@ -106,7 +107,7 @@ namespace SntraxWebAPI.Services
             return returnXmlstring.ToString();
         }
 
-        public List<GetEIMRmaResult> getEIMRmaResult(DataSet dataSet,string SerialNumber)
+        public List<GetEIMRmaResult> getEIMRmaResult(DataSet dataSet, string SerialNumber)
         {
 
             DataTable dtEIMRma = new DataTable();
@@ -153,6 +154,179 @@ namespace SntraxWebAPI.Services
             }
 
             return getEIMRmaList;
+        }
+
+        public string validateSNv6(SNv6 _SNv6)
+        {
+
+            string msg_rtn = "";
+            if (string.IsNullOrWhiteSpace(_SNv6.Type).Equals(0))
+            {
+                msg_rtn += "Type cannot be empty.";
+            }
+            if ((_SNv6.Type ?? "").Trim().Length > 1)
+            {
+                msg_rtn += "Type length cannot be more than one character long. ";
+            }
+            if (!(_SNv6.Type ?? "").Trim().Equals("A") && !(_SNv6.Type ?? "").Trim().Equals("U"))
+            {
+                msg_rtn += "Type must be either A or U";
+            }
+            if ((_SNv6.Site ?? "").Trim().Length == 0)
+            {
+                msg_rtn += "Site cannot be empty.";
+            }
+            if ((_SNv6.Site ?? "").Trim().Length > 5)
+            {
+                msg_rtn += "Site length cannot be more than five character long. ";
+            }
+            if ((_SNv6.SN ?? "").Trim().Length == 0)
+            {
+                msg_rtn += "SN cannot be empty.";
+            }
+            if ((_SNv6.SN ?? "").Trim().Length > 30)
+            {
+                msg_rtn += "SN length cannot be more than 30 character long. ";
+            }
+            if ((_SNv6.ProductName ?? "").Trim().Length == 0)
+            {
+                msg_rtn += "Product Name cannot be empty.";
+            }
+            if ((_SNv6.ProductName ?? "").Trim().Length > 15)
+            {
+                msg_rtn += "Product Name cannot be over 15 character long. ";
+            }
+            if ((_SNv6.WorkOrder ?? "").Trim().Length == 0)
+            {
+                msg_rtn += "Workorder cannot be empty.";
+            }
+            if ((_SNv6.WorkOrder ?? "").Trim().Length > 15)
+            {
+                msg_rtn += "Workorder length cannot be more than 15 character long. ";
+            }
+            if ((_SNv6.CustomerSN ?? "").Trim().Length > 50)
+            {
+                msg_rtn += "Customer SN length cannot be more than 50 character long. ";
+            }
+            //if (_SNv6.BuildDate.ToString().Length > 10)
+            //    _hasError = 'Y';
+            if ((_SNv6.BuildDate ?? "").Trim().Length == 0)
+            {
+                msg_rtn += "Build Date cannot be empty.";
+            }
+            if ((_SNv6.COO ?? "").Trim().Length > 2)
+            {
+                msg_rtn += "COO flag length cannot be more than two character long. ";
+            }
+            if ((_SNv6.Batch ?? "").Trim().Length > 10)
+            {
+                msg_rtn += "Batch ID length cannot be more than 10 character long. ";
+            }
+            if ((_SNv6.Batch ?? "").Trim().Length == 0)
+            {
+                msg_rtn += "Batch ID cannot be empty.";
+            }
+            if ((_SNv6.MM ?? "").Trim().Length > 6)
+            {
+                msg_rtn += "MM length cannot be more than six character long. ";
+            }
+            if ((_SNv6.MM ?? "").Trim().Length == 0)
+            {
+                //msg_rtn += "MM cannot be empty.";
+            }
+            if ((_SNv6.Version ?? "").Trim().Length > 15)
+            {
+                msg_rtn += "Version length cannot be more than 15 character long. ";
+            }
+            if ((_SNv6.Version ?? "").Trim().Length == 0)
+            {
+                //msg_rtn += "Version cannot be empty.";
+            }
+            if ((_SNv6.CartonID ?? "").Trim().Length > 10)
+            {
+                msg_rtn += "Carton ID length cannot be more than 10 character long. ";
+            }
+            if ((_SNv6.PalletID ?? "").Trim().Length > 10)
+            {
+                msg_rtn += "Pallet ID length cannot be more than 10 character long. ";
+            }
+            if ((_SNv6.ReceiptID ?? "").Trim().Length > 15)
+            {
+                msg_rtn += "Receipt ID length cannot be more than 15 character long. ";
+            }
+
+            return msg_rtn;
+        }
+        public string validateSNv6_comp(Components _component)
+        {
+            string msg_rtn = "";
+            if ((_component.IntelPartNumber ?? "").Trim().Length > 15)
+            {
+                msg_rtn += "Intel Part Number cannot be more than 15 character long. ";
+            }
+            if ((_component.Vendor ?? "").Trim().Length > 6)
+            {
+                msg_rtn += "Vendor cannot be more than six character long. ";
+            }
+            if ((_component.VendorSN ?? "").Trim().Length > 64)
+            {
+                msg_rtn += "Vendor SN cannot be more than 64 character long. ";
+            }
+            if ((_component.Desc ?? "").Trim().Length > 40)
+            {
+                msg_rtn += "Description cannot be more than 40 character long. ";
+            }
+            if ((_component.ManufacturerPartNumber ?? "").Trim().Length > 20)
+            {
+                msg_rtn += "Manufacturer Part Number cannot be more than 20 character long. ";
+            }
+            //Add Intel PN and Vendor SN to msg.
+            if (msg_rtn.Length > 0)
+            {
+                msg_rtn = "[IntelPN: " + _component.IntelPartNumber + "][Vendor SN: " + _component.VendorSN + "]" + msg_rtn;
+            }
+
+            return msg_rtn;
+        }
+
+        public List<ClsOLDataByMultipleSN> getDataByMultipleSN(DataTable dataTable, bool isDN)
+        {
+            string methodName = "getIbaseData";
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            List<ClsOLDataByMultipleSN> returnList = new List<ClsOLDataByMultipleSN>();
+            try
+            {
+                for (int i = 0; i < dataTable.Rows.Count; i++)
+                {
+                    ClsOLDataByMultipleSN item = new ClsOLDataByMultipleSN();
+                    item.ULTID = dataTable.Rows[i]["ULTID"].ToString();
+                    item.MMID = dataTable.Rows[i]["MMID"].ToString();
+                    item.Shipdate = dataTable.Rows[i]["Shipdate"].ToString();
+                    item.DeliveryNote = dataTable.Rows[i]["DeliveryNote"].ToString();
+                    item.Spec_cd = dataTable.Rows[i]["Spec_cd"].ToString();
+                    item.Product_Code = dataTable.Rows[i]["Product_Code"].ToString();
+                    item.Sales_Org = dataTable.Rows[i]["MSales_OrgMID"].ToString();
+                    item.Dist_Channel = dataTable.Rows[i]["Dist_Channel"].ToString();
+                    item.ShipToId = dataTable.Rows[i]["ShipToId"].ToString();
+                    item.ShiptoName = dataTable.Rows[i]["ShiptoName"].ToString();
+                    item.SoldtoId = dataTable.Rows[i]["SoldtoId"].ToString();
+                    item.SoldtoName = dataTable.Rows[i]["SoldtoName"].ToString();
+                    item.Status = string.IsNullOrWhiteSpace(dataTable.Rows[i]["MMID"].ToString()) ? "NF" : "F";
+                    returnList.Add(item);
+                }
+
+            }
+            catch (Exception ex)
+            {
+              //  clsSendMail sm = new clsSendMail("Get_r4cSntraxOrchs_SearchByMultipleSN", Environment.MachineName);
+               // sm.SendEmail(eX.Message.ToString());
+                CLogger.LogInfo(methodName + " exception : " + ex.Message);
+            }
+            stopwatch.Stop();
+            CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
+
+            return returnList;
         }
     }
 }

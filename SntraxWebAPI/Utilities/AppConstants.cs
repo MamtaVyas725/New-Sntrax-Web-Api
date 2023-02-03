@@ -25,6 +25,8 @@
         public static string SP_INT_IBASE_GET_DN = "sp_int_IBase_get_dn";
         public static string SP_INT_IBASE_GET_SN = "sp_int_IBase_get_sn";
         public static string SP_IN_EIM_GET_SHIPRMA_DATA = "sntrax_current..sp_in_eim_get_shiprma_data";
+        public static string SP_INT_WS_INSERT_BUILD_UPLOAD = "sntrax_batch..sp_int_ws_Insert_Build_Upload";
+        public static string SPGET_R4C_SNTRAX_ORCHS_SEARCH_BYSN = "sntrax_batch.dbo.spGet_r4cSntraxOrchs_SearchBySN";
 
     }
 }

@@ -36,6 +36,7 @@ namespace SntraxWebAPI.Controllers
         private string _outerDNXML = string.Empty;
         private string _EIMRmaXML = string.Empty;
         private string _eIMRmaXML = string.Empty;
+        private string _multipleSNXML = string.Empty;
         private static int dbSuccess = -1;
 
         private SntraxService sntraxService;
@@ -59,6 +60,7 @@ namespace SntraxWebAPI.Controllers
             _emailSender = _rootObjectCommon.GetValue<string>("EmailConfiguration:emailSender");
             _outerDNXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:OuterXML");
             _eIMRmaXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:EIMRmaXML");
+            _multipleSNXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:MultipleSNXML");
             CLogger._logger = _logger;
             sntraxService = new SntraxService();
         }
@@ -80,9 +82,9 @@ namespace SntraxWebAPI.Controllers
             var myJsonResponse = Repo.XmlToJson(innerObject);
             IBaseGetDataByDN myDeserializedClass = JsonConvert.DeserializeObject<IBaseGetDataByDN>(myJsonResponse);
             var IBaseDataDNList = myDeserializedClass.list.DN.ToList();
-            List<IBaseData>returnList = new List<IBaseData>();
+            List<IBaseData> returnList = new List<IBaseData>();
             string dnString = "";
-            
+
             List<IBaseData> IBaseData = new List<IBaseData>();
             if (IBaseDataDNList != null && IBaseDataDNList.Count > 0)
             {
@@ -94,14 +96,17 @@ namespace SntraxWebAPI.Controllers
                 {
                     // Test DB Connection with Retry
                     dbSuccess = Repo.ConnectToRetry(ref sDBName, _dbRetry);
-                    DataSet dataSet = new DataSet();
-                    SqlParameter[] param = {
+                    if (dbSuccess == 0)
+                    {
+                        DataSet dataSet = new DataSet();
+                        SqlParameter[] param = {
                            new SqlParameter("@param_dn",dnString),
                           };
-                    dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_INT_IBASE_GET_DN, param);
-                    returnList = sntraxService.getIbaseData(dataSet, true);
-                    stringwriter = sntraxService.Serialize(returnList);
-                    FinalDNXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter));
+                        dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_INT_IBASE_GET_DN, param);
+                        returnList = sntraxService.getIbaseData(dataSet, true);
+                        stringwriter = sntraxService.Serialize(returnList);
+                        FinalDNXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -133,7 +138,7 @@ namespace SntraxWebAPI.Controllers
             List<IBaseData> returnList = new List<IBaseData>();
             SntraxService sntraxService = new SntraxService();
             List<IBaseData> IBaseData = new List<IBaseData>();
-                      
+
             if (snString != "")
             {
                 try
@@ -178,7 +183,7 @@ namespace SntraxWebAPI.Controllers
             string sDBName = string.Empty;
             string FinalEIMRmaXml = string.Empty;
             List<GetEIMRmaResult> getEIMRmaResult = new List<GetEIMRmaResult>();
-            
+
             try
             {
                 var soapBody = doc.GetElementsByTagName("strSN")[0];
@@ -206,11 +211,209 @@ namespace SntraxWebAPI.Controllers
         }
 
         [HttpPost]
+        [Consumes("application/xml")]
         [Route("UploadSNv6")]
-        public List<SNv6> UploadSNv6(List<SNv6> SNv6List)
+        public string UploadSNv6(XmlDocument doc)
         {
-            List<SNv6> _rtnList = new List<SNv6>();
-            return _rtnList;
+
+            string methodName = "UploadSNv6";
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            string sDBName = string.Empty;
+            string stringwriter = string.Empty;
+            string FinalDNXml = string.Empty;
+            var soapBody = doc.GetElementsByTagName("UploadSNv6")[0];
+            string innerObject = soapBody.InnerXml;
+            var myJsonResponse = Repo.XmlToJson(innerObject);
+            SNv6Root myDeserializedClass = JsonConvert.DeserializeObject<SNv6Root>(myJsonResponse);
+            List<SNv6> SNv6List = myDeserializedClass.SNv6List.SNv6.ToList();
+            List<SNv6> _rtnList = new List<SNv6>(); //New list for returning to caller
+            DateTime update_dt = DateTime.Now;
+            try
+            {
+                // Test DB Connection with Retry
+                dbSuccess = Repo.ConnectToRetry(ref sDBName, _dbRetry);
+                if (dbSuccess == 0)
+                {
+                    foreach (SNv6 _SNv6 in SNv6List)
+                    {
+                        SNv6 _rtnSNv6 = new SNv6(); //New SNv6 to be added to the return list
+                        char _hasError = '0';
+                        string _msg = "";
+                        string _comp_msg = "";
+                        try
+                        {
+                            _msg = sntraxService.validateSNv6(_SNv6);
+                            if (!_msg.Equals(""))
+                                _hasError = '1';
+                            foreach(Components _component in _SNv6.ComponentList.Component)
+                            {
+                                _comp_msg += sntraxService.validateSNv6_comp(_component);
+                                if (!string.IsNullOrWhiteSpace(_comp_msg) && _hasError == '0')
+                                    _hasError = '2';
+                                if (!string.IsNullOrWhiteSpace(_comp_msg) && _hasError == '1')
+                                    _hasError = '3';
+                            }
+                            _msg += _comp_msg;
+                            SqlParameter[] param = {
+                              new SqlParameter("@rec_type","NOCNF"),
+                              new SqlParameter("@typ",_SNv6.Type),
+                              new SqlParameter("@siteid", (_SNv6.Site ?? "").Trim()),
+                              new SqlParameter("@sn", (_SNv6.SN ?? "").Trim()),
+                              new SqlParameter("@fcst_prd_nm", (_SNv6.ProductName ?? "").Trim()),
+                              new SqlParameter("@workorder", (_SNv6.WorkOrder ?? "").Trim()),
+                              new SqlParameter("@intel_pn", ""),
+                              new SqlParameter("@vendor", ""),
+                              new SqlParameter("@vendor_sn", ""),
+                              new SqlParameter("@cust_pn", ""),
+                              new SqlParameter("@cust_sn", (_SNv6.CustomerSN ?? "").Trim()),
+                              new SqlParameter("@workdate", (_SNv6.BuildDate ?? "").Trim()),
+                              new SqlParameter("@coo_flag", (_SNv6.COO ?? "").Trim()),
+                              new SqlParameter("@descr", ""),
+                              new SqlParameter("@batch_no", (_SNv6.Batch ?? "").Trim()),
+                              new SqlParameter("@mat_id", _SNv6.MM),
+                              new SqlParameter("@version", (_SNv6.Version ?? "").Trim()),
+                              new SqlParameter("@carton_id", (_SNv6.CartonID ?? "").Trim()),
+                              new SqlParameter("@pallet_id", (_SNv6.PalletID ?? "").Trim()),
+                              new SqlParameter("@receipt_id", (_SNv6.ReceiptID ?? "").Trim()),
+                              new SqlParameter("@update_dt", update_dt),
+                              new SqlParameter("@hasError", _hasError),
+                              new SqlParameter("@msg", (_msg ?? "").Trim()),
+                        };
+                            Repo.ExecuteNonQuery(sDBName, AppConstants.SP_INT_WS_INSERT_BUILD_UPLOAD, param);
+
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                        //Assign _SNv6 to return variables
+                        _rtnSNv6 = _SNv6;
+                        //_rtnSNv6._status = _hasError.ToString();
+                       // _rtnSNv6._msg = _msg;
+
+                        //Temp component list
+                        List<Components> tempComp = new List<Components>();
+
+                        foreach (Components _component in _SNv6.ComponentList.Component)
+                        {
+                            Components _rtnComponent = new Components(); //New return component
+
+                            try
+                            {
+
+                                SqlParameter[] param = {
+                                    new SqlParameter("@rec_type", "CONF"),
+                                new SqlParameter("@typ", _SNv6.Type),
+                                new SqlParameter("@siteid", ""),
+                                new SqlParameter("@sn", (_SNv6.SN ?? "").Trim()),
+                                new SqlParameter("@fcst_prd_nm", ""),
+                                new SqlParameter("@workorder", ""),
+                                new SqlParameter("@intel_pn", (_component.IntelPartNumber ?? "").Trim()),
+                                new SqlParameter("@vendor", (_component.Vendor ?? "").Trim()),
+                                new SqlParameter("@vendor_sn", (_component.VendorSN ?? "").Trim()),
+                                new SqlParameter("@cust_pn", (_component.ManufacturerPartNumber ?? "").Trim()),
+                                new SqlParameter("@cust_sn", ""),
+                                new SqlParameter("@workdate", ""),
+                                new SqlParameter("@coo_flag", ""),
+                                new SqlParameter("@descr", (_component.Desc ?? "").Trim()),
+                                new SqlParameter("@batch_no", ""),
+                                new SqlParameter("@mat_id", ""),
+                                new SqlParameter("@version", ""),
+                                new SqlParameter("@carton_id", ""),
+                                new SqlParameter("@pallet_id", ""),
+                                new SqlParameter("@receipt_id", ""),
+                                new SqlParameter("@update_dt", update_dt),
+                                new SqlParameter("@hasError", _hasError),
+                                new SqlParameter("@msg", ""),
+                            };
+                              Repo.ExecuteNonQuery(sDBName, AppConstants.SP_INT_WS_INSERT_BUILD_UPLOAD, param);
+                            }
+                            catch (Exception eX)
+                            {
+                                //   clsSendMail sm = new clsSendMail("UploadSNv6", Environment.MachineName);
+                                //  sm.SendEmail(eX.Message.ToString());
+                            }
+
+                            //Assign component to return component
+                            _rtnComponent = _component;
+
+                            //Assign component msg to return component
+                            //_rtnComponent._msg = _comp_msg;
+
+                            //Add component to return variable
+                            tempComp.Add(_rtnComponent);
+
+                        }
+                        _rtnSNv6.ComponentList = tempComp;
+                        //Add return variable to return list
+                        _rtnList.Add(_rtnSNv6);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            stringwriter = sntraxService.Serialize(_rtnList);
+            var FinalDNXml1 = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter));
+            return FinalDNXml1;
         }
+
+
+
+        [HttpPost]
+        [Consumes("application/xml")]
+        [Route("Get_r4cSntraxOrchs_SearchByMultipleSN")]
+        public string Get_r4cSntraxOrchs_SearchByMultipleSN(XmlDocument doc)
+        {
+            string methodName = "Get_r4cSntraxOrchs_SearchByMultipleSN";
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            string sDBName = string.Empty;
+            string stringwriter = string.Empty;
+            string FinalDNXml = string.Empty;
+            var soapBody = doc.GetElementsByTagName("Get_r4cSntraxOrchs_SearchByMultipleSN")[0];
+            string innerObject = soapBody.InnerXml;
+            var myJsonResponse = Repo.XmlToJson(innerObject);
+            var r = myJsonResponse.Replace("\"SNList\":{", "\"SNList\":[{").Replace("}}}", "}]}}");
+            SearchByMultipleSNList myDeserializedClass = JsonConvert.DeserializeObject<SearchByMultipleSNList>(r);
+            var SNList = myDeserializedClass.SNList.ToList();
+            List<ClsOLDataByMultipleSN> returnList = new List<ClsOLDataByMultipleSN>();
+            string snString = "";
+
+            if (SNList != null && SNList.Count > 0)
+            {
+                snString = string.Join("|", SNList.Select(x => x.SN)).TrimEnd(',');
+            }
+            if (snString != "")
+            {
+                try
+                {
+                    // Test DB Connection with Retry
+                    dbSuccess = Repo.ConnectToRetry(ref sDBName, _dbRetry);
+                    if (dbSuccess == 0)
+                    {
+                        DataTable dataTable = new DataTable();
+                        SqlParameter[] param = {
+                           new SqlParameter("@param_sn",snString),
+                          };
+                        dataTable = Repo.GetDataTable(sDBName, AppConstants.SPGET_R4C_SNTRAX_ORCHS_SEARCH_BYSN, param);
+                        returnList = sntraxService.getDataByMultipleSN(dataTable, true);
+                        stringwriter = sntraxService.Serialize(returnList);
+                        FinalDNXml = string.Format(_multipleSNXML, sntraxService.ReplaceXmlTag(stringwriter));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CLogger.LogInfo(methodName + " exception : " + ex.Message);
+                }
+                stopwatch.Stop();
+                CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
+            }
+            return FinalDNXml;
+        }
+
     }
 }
