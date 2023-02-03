@@ -332,8 +332,8 @@ namespace SntraxWebAPI.Services
             }
             catch (Exception ex)
             {
-              //  clsSendMail sm = new clsSendMail("Get_r4cSntraxOrchs_SearchByMultipleSN", Environment.MachineName);
-               // sm.SendEmail(eX.Message.ToString());
+                //  clsSendMail sm = new clsSendMail("Get_r4cSntraxOrchs_SearchByMultipleSN", Environment.MachineName);
+                // sm.SendEmail(eX.Message.ToString());
                 CLogger.LogInfo(methodName + " exception : " + ex.Message);
             }
             stopwatch.Stop();
@@ -341,5 +341,37 @@ namespace SntraxWebAPI.Services
 
             return returnList;
         }
+
+
+        public ShipToResult GetShippingDetails(DataSet dataSet)
+        {
+            ShipToResult shipResult = new()
+            {
+                RecordFound = 0 //default or record not found
+            };
+            try
+            {
+                if (dataSet.Tables.Count > 0)
+                {
+                    DataTable dtCustomerDetails = new();
+                    dtCustomerDetails = dataSet.Tables[0];
+                    shipResult.RecordFound = 1; //record found
+                    shipResult.ProductCode = (dtCustomerDetails.Rows[0].Field<string>(0) ?? "");
+                    shipResult.ShippingDate = (dtCustomerDetails.Rows[0].Field<string>(1) ?? "");
+                    shipResult.FERT = (dtCustomerDetails.Rows[0].Field<string>(2) ?? "");
+                    shipResult.CustomerID = (dtCustomerDetails.Rows[0].Field<string>(3) ?? "");
+                    shipResult.CustomerName = (dtCustomerDetails.Rows[0].Field<string>(4) ?? "");
+                    shipResult.WarrantyExpire = (dtCustomerDetails.Rows[0].Field<string>(5) ?? "");
+                    shipResult.CustomerRegion = (dtCustomerDetails.Rows[0].Field<string>(6) ?? "");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return shipResult;
+        }
+
+
     }
 }

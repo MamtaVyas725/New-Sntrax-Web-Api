@@ -109,10 +109,11 @@ namespace SntraxWebAPI.Controllers
                         SqlParameter[] param = {
                            new SqlParameter("@param_dn",dnString),
                           };
-                    dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_INT_IBASE_GET_DN, param);
-                    returnList = sntraxService.getIbaseData(dataSet, true);
-                    stringwriter = sntraxService.Serialize(returnList);
-                    FinalDNXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter,""));
+                        dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_INT_IBASE_GET_DN, param);
+                        returnList = sntraxService.getIbaseData(dataSet, true);
+                        stringwriter = sntraxService.Serialize(returnList);
+                        FinalDNXml = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter, ""));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -470,4 +471,4 @@ namespace SntraxWebAPI.Controllers
 
     }
 }
-}
+
