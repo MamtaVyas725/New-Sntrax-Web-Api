@@ -162,5 +162,37 @@ namespace SntraxWebAPI.Repository
             string jsonText = JsonConvert.SerializeXmlNode(doc);
             return jsonText;
         }
+        // INSERT,UPDATE, DELETE
+        public static int ExecuteNonQuery(string connString, string procedureName, params SqlParameter[] commandParameters)
+        {
+            int result = -1;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand();
+                    cmd.Connection = conn;
+                    cmd.CommandText = procedureName;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandTimeout = 0;
+                    if (commandParameters != null)
+                    {
+                        cmd.Parameters.AddRange(commandParameters);
+                    }
+                    cmd.ExecuteNonQuery();
+                    if (cmd.Parameters["@rowCount"].Value != null)
+                        result = Convert.ToInt32(cmd.Parameters["@rowCount"].Value);
+                    cmd.Parameters.Clear();
+                }
+            }
+            catch (Exception ex)
+            {
+                result = -1;
+                throw new Exception(ex.ToString());
+            }
+            return result;
+        }
+
     }
 }

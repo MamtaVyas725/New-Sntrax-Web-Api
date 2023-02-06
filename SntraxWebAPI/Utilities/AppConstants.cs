@@ -33,6 +33,8 @@
         public static string EMAIL_SERVER = "png-out.intel.com";
         public static string DB_MAX_TIMEOUT = "60";
 
+        public static string SP_INT_WS_INSERT_BUILD_UPLOAD = "sntrax_batch..sp_int_ws_Insert_Build_Upload";
+        public static string SPGET_R4C_SNTRAX_ORCHS_SEARCH_BYSN = "sntrax_batch.dbo.spGet_r4cSntraxOrchs_SearchBySN";
 
     }
 }
