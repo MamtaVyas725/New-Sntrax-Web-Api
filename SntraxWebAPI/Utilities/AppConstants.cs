@@ -29,7 +29,7 @@
 
         public static string DBRETRY = "2";
         public static string EMAIL_RECIPENT = "juhix.anjarlekar@intel.com";
-        public static string EMAIL_SENDER = "sntrax@intel.com;";
+        public static string EMAIL_SENDER = "sntrax@intel.com";
         public static string EMAIL_SERVER = "png-out.intel.com";
         public static string DB_MAX_TIMEOUT = "60";
 
