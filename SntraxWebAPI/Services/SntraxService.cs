@@ -1,12 +1,9 @@
 ﻿using EnttlOrchestrationLayer.Utilities;
 using SntraxWebAPI.Model;
-using System;
-using System.Collections.Generic;
+using SntraxWebAPI.Model.SearchByMultipleDN;
+using SntraxWebAPI.Utilities;
 using System.Data;
 using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Xml;
 using System.Xml.Serialization;
 
 namespace SntraxWebAPI.Services
@@ -102,19 +99,25 @@ namespace SntraxWebAPI.Services
         public string ReplaceXmlTag(string xmlstring, string methodName)
         {
             string returnXmlstring = string.Empty;
-            if (methodName == "get_EIMRma" || methodName == "IBaseGetDataByDN") //Mamta - change this if() as per your needs
+            if (methodName == "IBaseGetDataByDN")
             {
                 returnXmlstring = xmlstring.ToString().Replace("<ArrayOfIBaseData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfIBaseData>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
-                returnXmlstring = returnXmlstring.ToString().Replace("<ArrayOfGetEIMRmaResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfGetEIMRmaResult>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
-
             }
-            if (methodName == "IBaseGetSingleData")
+            else if (methodName == "IBaseGetSingleData")
             {
                 returnXmlstring = xmlstring.ToString().Replace("<ArrayOfIBaseData xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<IBaseGetSingleDataResult>").Replace("</ArrayOfIBaseData>", "</IBaseGetSingleDataResult>").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
             }
-            if (methodName == "Validate_SSD_CPU_ShipTo")
+            else if (methodName == "Validate_SSD_CPU_ShipTo")
             {
                 returnXmlstring = xmlstring.ToString().Replace("<ShipToResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<Validate_SSD_CPU_ShipToResult>").Replace("</ShipToResult>", "</Validate_SSD_CPU_ShipToResult>").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+            }
+            else if (methodName == "get_EIMRma")
+            {
+                returnXmlstring = returnXmlstring.ToString().Replace("<ArrayOfGetEIMRmaResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfGetEIMRmaResult>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+            }
+            else if (methodName == "SearchByMultipleDN")
+            {
+                returnXmlstring = xmlstring.ToString().Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "").Replace("<ArrayOfCls_r4cSntraxOrchs_DataByMultipleDN xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<Get_r4cSntraxOrchs_SearchByMultipleDNResult>").Replace("</ArrayOfCls_r4cSntraxOrchs_DataByMultipleDN>", "</Get_r4cSntraxOrchs_SearchByMultipleDNResult>");
             }
 
             return returnXmlstring.ToString();
@@ -371,6 +374,40 @@ namespace SntraxWebAPI.Services
             }
             return shipResult;
         }
+
+
+        public List<cls_r4cSntraxOrchs_DataByMultipleDN> getDataByMultipleDN(DataTable dataTable)
+        {
+            string methodName = "getDataByMultipleDN";
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            List<cls_r4cSntraxOrchs_DataByMultipleDN> returnList = new List<cls_r4cSntraxOrchs_DataByMultipleDN>();
+            try
+            {
+                for (int i = 0; i < dataTable.Rows.Count; i++)
+                {
+                    cls_r4cSntraxOrchs_DataByMultipleDN item = new cls_r4cSntraxOrchs_DataByMultipleDN();
+                    item.SN = string.IsNullOrWhiteSpace(dataTable.Rows[i]["SN"].ToString()) ? "" : dataTable.Rows[i]["SN"].ToString();
+                    item.MMID = string.IsNullOrWhiteSpace(dataTable.Rows[i]["MMID"].ToString()) ? "" : dataTable.Rows[i]["MMID"].ToString();
+                    item.DN = string.IsNullOrWhiteSpace(dataTable.Rows[i]["DN"].ToString()) ? "" : dataTable.Rows[i]["DN"].ToString();
+                    item.Shipdate = string.IsNullOrWhiteSpace(dataTable.Rows[i]["Shipdate"].ToString()) ? "" : dataTable.Rows[i]["Shipdate"].ToString();
+                    item.Status = string.IsNullOrWhiteSpace(dataTable.Rows[i]["MMID"].ToString()) ? "NF" : "F";
+                    returnList.Add(item);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                SendMail sm = new SendMail("getDataByMultipleDN", Environment.MachineName);
+                sm.SendEmail(ex.Message.ToString());
+                CLogger.LogInfo(methodName + " exception : " + ex.Message);
+            }
+
+            stopwatch.Stop();
+            CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
+            return returnList;
+        }
+
 
 
     }

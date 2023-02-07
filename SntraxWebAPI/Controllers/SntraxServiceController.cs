@@ -1,25 +1,16 @@
 ﻿using EnttlOrchestrationLayer.Utilities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
 using SntraxWebAPI.Model;
 using SntraxWebAPI.Repository;
 using System.Data.SqlClient;
 using System.Data;
 using System.Diagnostics;
-using System.Reflection;
 using System.Xml;
-using System.Diagnostics.CodeAnalysis;
 using SntraxWebAPI.Services;
-using static System.Net.Mime.MediaTypeNames;
-using System.Reflection.Metadata;
-using System.Xml.Linq;
 using Newtonsoft.Json;
-using System.Xml.Serialization;
-using System.IO;
-using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using SntraxWebAPI.Utilities;
+using SntraxWebAPI.Model.SearchByMultipleDN;
 
 namespace SntraxWebAPI.Controllers
 {
@@ -41,6 +32,7 @@ namespace SntraxWebAPI.Controllers
         private string _validate_SSD_CPU_ShipToResponseOuterXML = string.Empty;
         private string _iBaseGetSingleDataXML = string.Empty;
         private string _multipleSNXML = string.Empty;
+        private string _multipleDNOuterXML = string.Empty;
         private static int dbSuccess = -1;
 
         private SntraxService sntraxService;
@@ -68,6 +60,7 @@ namespace SntraxWebAPI.Controllers
             _DNXML = _rootObjectCommon.GetValue<string>("OuterXml:DNXML");
             _iBaseGetSingleDataXML = _rootObjectCommon.GetValue<string>("OuterXML:IBaseGetSingleDataXML");
             _validate_SSD_CPU_ShipToResponseOuterXML = _rootObjectCommon.GetValue<string>("OuterXml:Validate_SSD_CPU_ShipToResponseXML");
+            _multipleDNOuterXML = _rootObjectCommon.GetValue<string>("OuterXml:SearchByMultipleDNXML");
             CLogger._logger = _logger;
             sntraxService = new SntraxService();
         }
@@ -135,14 +128,14 @@ namespace SntraxWebAPI.Controllers
             stopwatch.Start();
             string sDBName = string.Empty;
             string stringwriter = string.Empty;
-            string FinalDNXml = string.Empty;            
+            string FinalDNXml = string.Empty;
             var soapBody = doc.GetElementsByTagName("IBaseGetSingleData")[0];
             string innerObject = soapBody.InnerText;
             string snString = Regex.Replace(innerObject, @"\s+", string.Empty);
-        
+
             SntraxService sntraxService = new SntraxService();
             List<IBaseData> IBaseData = new List<IBaseData>();
-                      
+
             if (snString != "")
             {
                 try
@@ -216,10 +209,10 @@ namespace SntraxWebAPI.Controllers
                 }
 
             }
-            catch (Exception eX)
+            catch (Exception ex)
             {
                 SendMail sm = new SendMail("Validate_SSD_CPU_ShipTo", Environment.MachineName);
-                sm.SendEmail(eX.Message.ToString());
+                sm.SendEmail(ex.Message.ToString());
                 result.RecordFound = 2;
             }
             return FinalDNXml;
@@ -236,7 +229,7 @@ namespace SntraxWebAPI.Controllers
             string sDBName = string.Empty;
             string FinalEIMRmaXml = string.Empty;
             List<GetEIMRmaResult> getEIMRmaResult = new List<GetEIMRmaResult>();
-            
+
             try
             {
                 var soapBody = doc.GetElementsByTagName("strSN")[0];
@@ -247,21 +240,21 @@ namespace SntraxWebAPI.Controllers
                 SqlParameter[] param = {
                            new SqlParameter("@sn",SerialNumber),
                           };
-        dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_IN_EIM_GET_SHIPRMA_DATA, param);
-        getEIMRmaResult = sntraxService.getEIMRmaResult(dataSet, SerialNumber);
-        string stringwriter = sntraxService.Serialize(getEIMRmaResult);
-        FinalEIMRmaXml = string.Format(_DNXML, sntraxService.ReplaceXmlTag(stringwriter, "get_EIMRma"));
+                dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_IN_EIM_GET_SHIPRMA_DATA, param);
+                getEIMRmaResult = sntraxService.getEIMRmaResult(dataSet, SerialNumber);
+                string stringwriter = sntraxService.Serialize(getEIMRmaResult);
+                FinalEIMRmaXml = string.Format(_DNXML, sntraxService.ReplaceXmlTag(stringwriter, "get_EIMRma"));
 
-    }
-    catch (Exception ex)
-    {
-        CLogger.LogInfo(methodName + " exception : " + ex.Message);
-    }
-    stopwatch.Stop();
-    CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
+            }
+            catch (Exception ex)
+            {
+                CLogger.LogInfo(methodName + " exception : " + ex.Message);
+            }
+            stopwatch.Stop();
+            CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
 
-    return FinalEIMRmaXml;
-}
+            return FinalEIMRmaXml;
+        }
 
         [HttpPost]
         [Consumes("application/xml")]
@@ -384,8 +377,8 @@ namespace SntraxWebAPI.Controllers
                             }
                             catch (Exception eX)
                             {
-                                //   clsSendMail sm = new clsSendMail("UploadSNv6", Environment.MachineName);
-                                //  sm.SendEmail(eX.Message.ToString());
+                                //    clsSendMail sm = new clsSendMail("UploadSNv6", Environment.MachineName);
+                                //    sm.SendEmail(eX.Message.ToString());
                             }
 
                             //Assign component to return component
@@ -453,7 +446,7 @@ namespace SntraxWebAPI.Controllers
                         SqlParameter[] param = {
                            new SqlParameter("@param_sn",snString),
                           };
-                        dataTable = Repo.GetDataTable(sDBName, AppConstants.SPGET_R4C_SNTRAX_ORCHS_SEARCH_BYSN, param);
+                        dataTable = Repo.GetDataTable(sDBName, AppConstants.SPGET_R4C_SNTRAX_ORCHS_SEARCH_BY_SN, param);
                         returnList = sntraxService.getDataByMultipleSN(dataTable, true);
                         stringwriter = sntraxService.Serialize(returnList);
                         FinalDNXml = string.Format(_multipleSNXML, sntraxService.ReplaceXmlTag(stringwriter, ""));
@@ -469,6 +462,63 @@ namespace SntraxWebAPI.Controllers
             return FinalDNXml;
         }
 
+
+        [HttpPost]
+        [Consumes("application/xml")]
+        [Route("Get_r4cSntraxOrchs_SearchByMultipleDN")]
+        public string Get_r4cSntraxOrchs_SearchByMultipleDN(XmlDocument doc)
+        {
+            string methodName = "Get_r4cSntraxOrchs_SearchByMultipleDN";
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            string sDBName = string.Empty;
+            string stringwriter = string.Empty;
+            string FinalDNXml = string.Empty;
+            var soapBody = doc.GetElementsByTagName("Get_r4cSntraxOrchs_SearchByMultipleDN")[0];
+            string innerObject = soapBody.InnerXml;
+            var myJsonResponse = Repo.XmlToJson(innerObject);
+            GetR4cSntraxOrchsSearchByMultipleDN myDeserializedClass = JsonConvert.DeserializeObject<GetR4cSntraxOrchsSearchByMultipleDN>(myJsonResponse);
+            var DNList = myDeserializedClass.list.DNList.ToList();
+            List<cls_r4cSntraxOrchs_DataByMultipleDN> returnList = new List<cls_r4cSntraxOrchs_DataByMultipleDN>();
+            string dnString = "";
+
+            if (DNList != null && DNList.Count > 0)
+            {
+                dnString = string.Join("|", DNList.Select(x => x.DN)).TrimEnd(',');
+            }
+            if (dnString != "")
+            {
+                try
+                {
+                    // Test DB Connection with Retry
+                    dbSuccess = Repo.ConnectToRetry(ref sDBName, _dbRetry);
+                    if (dbSuccess == 0)
+                    {
+                        DataTable dataTable = new DataTable();
+                        SqlParameter[] param = {
+                           new SqlParameter("@param_dn",dnString),
+                          };
+                        dataTable = Repo.GetDataTable(sDBName, AppConstants.SPGET_R4C_SNTRAX_ORCHS_SEARCH_BY_MULTIPLE_DN, param);
+                        returnList = sntraxService.getDataByMultipleDN(dataTable);
+                        stringwriter = sntraxService.Serialize(returnList);
+                        FinalDNXml = string.Format(_multipleDNOuterXML, sntraxService.ReplaceXmlTag(stringwriter, "SearchByMultipleDN"));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CLogger.LogInfo(methodName + " exception : " + ex.Message);
+                    SendMail sm = new SendMail("Get_r4cSntraxOrchs_SearchByMultipleDN", Environment.MachineName);
+                    sm.SendEmail(ex.Message.ToString());
+                }
+                stopwatch.Stop();
+                CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
+            }
+
+            return FinalDNXml;
+        }
+
     }
+
 }
 

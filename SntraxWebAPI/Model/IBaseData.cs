@@ -99,19 +99,3 @@ namespace SntraxWebAPI.Model
 
 
 #endregion InputDN
-
-public class DNList
-{
-    public string DN { get; set; }
-}
-
-public class cls_r4cSntraxOrchs_DataByMultipleDN
-{
-    public string SN { get; set; }
-    public string MMID { get; set; }
-    public string DN { get; set; }
-    public string Shipdate { get; set; }
-    public string Status { get; set; }
-
-
-}
