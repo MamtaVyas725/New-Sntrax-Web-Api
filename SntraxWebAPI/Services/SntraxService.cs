@@ -32,20 +32,20 @@ namespace SntraxWebAPI.Services
                     for (int i = 0; i < dtParent.Rows.Count; i++)
                     {
                         IBaseData ibaseParentData = new IBaseData();
-                        ibaseParentData.DistChannel = dtParent.Rows[i]["dist_channel"].ToString();
-                        // ibaseParentData.DN = dtParent.Rows[i]["dn"].ToString();
-                        ibaseParentData.GapInd = dtParent.Rows[i]["gap_ind"].ToString();
-                        ibaseParentData.MaterialID = dtParent.Rows[i]["material_id"].ToString();
-                        ibaseParentData.OpCode = dtParent.Rows[i]["op_code"].ToString();
-                        ibaseParentData.SalesOrg = dtParent.Rows[i]["sales_org"].ToString();
-                        ibaseParentData.ShipDate = dtParent.Rows[i]["ship_date"].ToString();
-                        ibaseParentData.ShipToCountry = dtParent.Rows[i]["shipto_country"].ToString();
-                        ibaseParentData.ShipToID = dtParent.Rows[i]["shipto_id"].ToString();
+                        ibaseParentData.Dist_Channel = dtParent.Rows[i]["dist_channel"].ToString();
+                        ibaseParentData.Gap_Ind = dtParent.Rows[i]["gap_ind"].ToString();
+                        ibaseParentData.Material_ID = dtParent.Rows[i]["material_id"].ToString();
+                        ibaseParentData.DN = dtParent.Rows[i]["dn"].ToString();
+                        ibaseParentData.Op_Code = dtParent.Rows[i]["op_code"].ToString();
+                        ibaseParentData.Sales_Org = dtParent.Rows[i]["sales_org"].ToString();
+                        ibaseParentData.Ship_Date = dtParent.Rows[i]["ship_date"].ToString();
+                        ibaseParentData.ShipTo_Country = dtParent.Rows[i]["shipto_country"].ToString();
+                        ibaseParentData.ShipTo_ID = dtParent.Rows[i]["shipto_id"].ToString();
                         ibaseParentData.SN = dtParent.Rows[i]["sn"].ToString();
-                        ibaseParentData.SoldToID = dtParent.Rows[i]["soldto_id"].ToString();
-                        ibaseParentData.SOType = dtParent.Rows[i]["so_type"].ToString();
-                        ibaseParentData.StockingID = dtParent.Rows[i]["stocking_id"].ToString();
-                        ibaseParentData.ShipId = Convert.ToInt32(dtParent.Rows[i]["ship_id"].ToString());
+                        ibaseParentData.SoldTo_ID = dtParent.Rows[i]["soldto_id"].ToString();
+                        ibaseParentData.SO_Type = dtParent.Rows[i]["so_type"].ToString();
+                        ibaseParentData.Stocking_ID = dtParent.Rows[i]["stocking_id"].ToString();
+                        ibaseParentData.Ship_Id = Convert.ToInt32(dtParent.Rows[i]["ship_id"].ToString());
                         if (isDN)
                         {
                             ibaseParentData.LineItem = dtParent.Rows[i]["sls_ord_id"].ToString();
@@ -57,8 +57,8 @@ namespace SntraxWebAPI.Services
                     {
                         IBaseChild baseChild = new IBaseChild();
                         parent_sn = dtChild.Rows[i]["sn"].ToString();
-                        baseChild.CompSN = dtChild.Rows[i]["comp_sn"].ToString();
-                        baseChild.StockingID = dtChild.Rows[i]["stocking_id"].ToString();
+                        baseChild.Comp_SN = dtChild.Rows[i]["comp_sn"].ToString();
+                        baseChild.Stocking_ID = dtChild.Rows[i]["stocking_id"].ToString();
                         returnList.Where(p => p.SN != null && p.SN.Equals(parent_sn)).FirstOrDefault().IBaseChildList.Add(baseChild);
                     }
                     for (int i = 0; i < dtGrandChild.Rows.Count; i++)
@@ -66,9 +66,9 @@ namespace SntraxWebAPI.Services
                         IBaseGrandChild baseGrandChild = new IBaseGrandChild();
                         parent_sn = dtGrandChild.Rows[i]["sn"].ToString();
                         comp_sn = dtGrandChild.Rows[i]["comp_sn"].ToString();
-                        baseGrandChild.CompSN = dtGrandChild.Rows[i]["comp_sn"].ToString();
-                        baseGrandChild.StockingID = dtGrandChild.Rows[i]["stocking_id"].ToString();
-                        returnList.Where(p => p.SN != null && p.SN.Equals(parent_sn)).FirstOrDefault().IBaseChildList.Find(c => c.CompSN == comp_sn).IBaseGrandChildList.Add(baseGrandChild);
+                        baseGrandChild.Comp_SN = dtGrandChild.Rows[i]["comp_sn"].ToString();
+                        baseGrandChild.Stocking_ID = dtGrandChild.Rows[i]["stocking_id"].ToString();
+                        returnList.Where(p => p.SN != null && p.SN.Equals(parent_sn)).FirstOrDefault().IBaseChildList.Find(c => c.Comp_SN == comp_sn).IBaseGrandChildList.Add(baseGrandChild);
                     }
                 }
 

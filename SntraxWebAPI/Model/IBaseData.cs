@@ -8,20 +8,20 @@ namespace SntraxWebAPI.Model
     #region OutputDN
     public class IBaseData
     {
-        public string? GapInd { get; set; }
+        public string? Gap_Ind { get; set; }
         public string? SN { get; set; }
-        public string? StockingID { get; set; }
-        public string? ShipDate { get; set; }
-        public string? MaterialID { get; set; }
+        public string? Stocking_ID { get; set; }
+        public string? Ship_Date { get; set; }
+        public string? Material_ID { get; set; }
         public string? DN { get; set; }
-        public string? ShipToID { get; set; }
-        public string? ShipToCountry { get; set; }
-        public string? SoldToID { get; set; }
-        public string? SalesOrg { get; set; }
-        public string? DistChannel { get; set; }
-        public string? OpCode { get; set; }
-        public string? SOType { get; set; }
-        public int? ShipId { get; set; }
+        public string? ShipTo_ID { get; set; }
+        public string? ShipTo_Country { get; set; }
+        public string? SoldTo_ID { get; set; }
+        public string? Sales_Org { get; set; }
+        public string? Dist_Channel { get; set; }
+        public string? Op_Code { get; set; }
+        public string? SO_Type { get; set; }
+        public int? Ship_Id { get; set; }
         public string? LineItem { get; set; }
         public string? SalesOrder { get; set; }
 
@@ -31,16 +31,16 @@ namespace SntraxWebAPI.Model
 
     public class IBaseChild
     {
-        public string? CompSN { get; set; }
-        public string? StockingID { get; set; }
+        public string? Comp_SN { get; set; }
+        public string? Stocking_ID { get; set; }
         public List<IBaseGrandChild> IBaseGrandChildList { get; set; } = new List<IBaseGrandChild>();
     }
 
 
     public class IBaseGrandChild
     {
-        public string? CompSN { get; set; }
-        public string? StockingID { get; set; }
+        public string? Comp_SN { get; set; }
+        public string? Stocking_ID { get; set; }
     }
 
     #endregion DNOutput
