@@ -67,7 +67,6 @@ namespace SntraxWebAPI.Controllers
 
 
         [HttpPost]
-        [Consumes("application/xml")]
         [Route("IBaseGetDataByDN")]
         public string IBaseGetDataByDN(XmlDocument doc)
         {
@@ -119,7 +118,6 @@ namespace SntraxWebAPI.Controllers
         }
 
         [HttpPost]
-        [Consumes("application/xml")]
         [Route("IBaseGetSingleData")]
         public string IBaseGetSingleData(XmlDocument doc)
         {
@@ -135,7 +133,7 @@ namespace SntraxWebAPI.Controllers
 
             SntraxService sntraxService = new SntraxService();
             List<IBaseData> IBaseData = new List<IBaseData>();
-
+           
             if (snString != "")
             {
                 try
@@ -162,7 +160,6 @@ namespace SntraxWebAPI.Controllers
         }
 
         [HttpPost]
-        [Consumes("application/xml")]
         [Route("Validate_SSD_CPU_ShipTo")]
         [ResponseCache(Duration = 30)]
         public string Validate_SSD_CPU_ShipTo(string RequestType, string RequestValue)
@@ -215,11 +212,12 @@ namespace SntraxWebAPI.Controllers
                 sm.SendEmail(ex.Message.ToString());
                 result.RecordFound = 2;
             }
+            //SendMail sm1 = new SendMail("Validate_SSD_CPU_ShipTo", Environment.MachineName);
+            //sm1.SendEmail("Validate_SSD_CPU_ShipTo");
             return FinalDNXml;
         }
 
         [HttpPost]
-        [Consumes("application/xml")]
         [Route("get_EIMRma")]
         public string get_EIMRma(XmlDocument doc)
         {
@@ -257,7 +255,6 @@ namespace SntraxWebAPI.Controllers
         }
 
         [HttpPost]
-        [Consumes("application/xml")]
         [Route("UploadSNv6")]
         public string UploadSNv6(XmlDocument doc)
         {
@@ -411,7 +408,6 @@ namespace SntraxWebAPI.Controllers
 
 
         [HttpPost]
-        [Consumes("application/xml")]
         [Route("Get_r4cSntraxOrchs_SearchByMultipleSN")]
         public string Get_r4cSntraxOrchs_SearchByMultipleSN(XmlDocument doc)
         {
@@ -464,7 +460,6 @@ namespace SntraxWebAPI.Controllers
 
 
         [HttpPost]
-        [Consumes("application/xml")]
         [Route("Get_r4cSntraxOrchs_SearchByMultipleDN")]
         public string Get_r4cSntraxOrchs_SearchByMultipleDN(XmlDocument doc)
         {

@@ -25,6 +25,26 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SntraxWebAPI v1"));
 }
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SntraxWebAPI v1"));
+}
+if (app.Environment.IsEnvironment("Cons"))
+{
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SntraxWebAPI-Cons v1"));
+}
+if (app.Environment.IsEnvironment("Production"))
+{
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SntraxWebAPI-Production v1"));
+}
+
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

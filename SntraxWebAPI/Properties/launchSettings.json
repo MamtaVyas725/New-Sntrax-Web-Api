@@ -9,22 +9,47 @@
     }
   },
   "profiles": {
-    "SntraxWebAPI": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Constr": "Server=azpresntx2dv02.amr.corp.intel.com,Port=3180;Database=sntrax_batch;Userid=sntrax_writer;Password=SNTRXdvWR;sslmode=allow;"
+      }
+    },
+    "SntraxWebAPI-Development": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7186;http://localhost:5186",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Constr": "Server=azpresntx2dv02.amr.corp.intel.com,Port=3180;Database=sntrax_batch;Userid=sntrax_writer;Password=SNTRXdvWR;sslmode=allow;"
       }
     },
-    "IIS Express": {
-      "commandName": "IISExpress",
+    "SntraxWebAPI-Cons": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7186;http://localhost:5186",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Cons",
+        "Constr": "Server=azpresntx2dv02.amr.corp.intel.com,Port=3180;Database=sntrax_batch;Userid=sntrax_writer;Password=SNTRXdvWR;sslmode=allow;"
+      }
+    },
+    "SntraxWebAPI-Production": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7186;http://localhost:5186",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production",
+        "Constr": "Server=azpresntx2dv02.amr.corp.intel.com,Port=3180;Database=sntrax_batch;Userid=sntrax_writer;Password=SNTRXdvWR;sslmode=allow;"
       }
     }
   }
