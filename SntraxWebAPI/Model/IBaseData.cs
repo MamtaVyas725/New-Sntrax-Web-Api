@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using System.Xml.Serialization;
 
-namespace SntraxWebAPI.Model
+namespace SntraxWebAPI.Model.IBaseData
 {
 
     #region OutputDN
@@ -94,8 +94,6 @@ namespace SntraxWebAPI.Model
     {
         public Envelope Envelope { get; set; }
     }
+    #endregion InputDN
 
 }
-
-
-#endregion InputDN

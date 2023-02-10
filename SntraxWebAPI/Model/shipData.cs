@@ -1,22 +1,22 @@
 ﻿namespace SntraxWebAPI.Model
 {
-    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
-    //public class Body
-    //{
-    //    public GetEIMRmaResponse get_EIMRmaResponse { get; set; }
-    //}
 
-    //public class Envelope
-    //{
-    //    public Body Body { get; set; }
-    //}
-
-    public class GetEIMRmaResponse
+    public class Body
     {
-        public GetEIMRmaResult get_EIMRmaResult { get; set; }
+        public get_EIMRmaResponse get_EIMRmaResponse { get; set; }
     }
 
-    public class GetEIMRmaResult
+    public class Envelope
+    {
+        public Body Body { get; set; }
+    }
+
+    public class get_EIMRmaResponse
+    {
+        public get_EIMRmaResult get_EIMRmaResult { get; set; }
+    }
+
+    public class get_EIMRmaResult
     {
         public string SerialNumber { get; set; }
         public string ShipDate { get; set; }
@@ -25,18 +25,13 @@
         public int ReplacementFrequency { get; set; }
         public string StolenProduct { get; set; }
         public int ProcessCode { get; set; }
-        public List<PartNumberList> PartNumberList { get; set; }
+        public List<string> PartNumberList = new List<string>();
     }
 
-    public class PartNumberList
+    public class shipData
     {
-        public List<string> PartNumber { get; set; } = new List<string>();
+        public Envelope Envelope { get; set; }
     }
-
-    //public class shipData
-    //{
-    //    public Envelope Envelope { get; set; }
-    //}
 
 
 }

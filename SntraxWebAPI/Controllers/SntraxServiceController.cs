@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using SntraxWebAPI.Utilities;
 using SntraxWebAPI.Model.SearchByMultipleDN;
+using SntraxWebAPI.Model.IBaseGetDataByDN;
 
 namespace SntraxWebAPI.Controllers
 {
@@ -23,11 +24,7 @@ namespace SntraxWebAPI.Controllers
         private string _constrPrimary = string.Empty;
         private string _constrSecondary = string.Empty;
         private string _dbRetry = string.Empty;
-        private string _emailRecipent = string.Empty;
-        private string _emailSender = string.Empty;
-        private string _DNXML = string.Empty;
-        private string _EIMRmaXML = string.Empty;
-        private string _eIMRmaXML = string.Empty;
+        private string _eimRmaXML = string.Empty;
         private string _outerDNXML = string.Empty;
         private string _validate_SSD_CPU_ShipToResponseOuterXML = string.Empty;
         private string _iBaseGetSingleDataXML = string.Empty;
@@ -51,13 +48,10 @@ namespace SntraxWebAPI.Controllers
             _constrSecondary = _rootObjectCommon.GetValue<string>("ConnectionStrings:ConstrSecondry");
             Repo.connStringPrimary = _constrPrimary;
             Repo.connStringSecondary = _constrSecondary;
-            _dbRetry = _rootObjectCommon.GetValue<string>("EmailConfiguration:dbRetry");
-            _emailRecipent = _rootObjectCommon.GetValue<string>("EmailConfiguration:emailRecipent");
-            _emailSender = _rootObjectCommon.GetValue<string>("EmailConfiguration:emailSender");
-            _outerDNXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:OuterXML");
-            _eIMRmaXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:EIMRmaXML");
+            _dbRetry = _rootObjectCommon.GetValue<string>("EmailConfiguration:dbRetry");            
+            _outerDNXML = _rootObjectCommon.GetValue<string>("OuterXml:DNXML");
+            _eimRmaXML = _rootObjectCommon.GetValue<string>("OuterXml:EIMRmaXML");
             _multipleSNOuterXML = _rootObjectCommon.GetValue<string>("OuterXml:SearchByMultipleSNXML");
-            _DNXML = _rootObjectCommon.GetValue<string>("OuterXml:DNXML");
             _iBaseGetSingleDataXML = _rootObjectCommon.GetValue<string>("OuterXML:IBaseGetSingleDataXML");
             _validate_SSD_CPU_ShipToResponseOuterXML = _rootObjectCommon.GetValue<string>("OuterXml:Validate_SSD_CPU_ShipToResponseXML");
             _multipleDNOuterXML = _rootObjectCommon.GetValue<string>("OuterXml:SearchByMultipleDNXML");
@@ -80,11 +74,11 @@ namespace SntraxWebAPI.Controllers
             string innerObject = soapBody.InnerXml;
             var myJsonResponse = Repo.XmlToJson(innerObject);
             IBaseGetDataByDN myDeserializedClass = JsonConvert.DeserializeObject<IBaseGetDataByDN>(myJsonResponse);
-            var IBaseDataDNList = myDeserializedClass.list.DN.ToList();
-            List<IBaseData> returnList = new List<IBaseData>();
+            var IBaseDataDNList = myDeserializedClass.list.IBaseData.ToList();
+            List<Model.IBaseData.IBaseData> returnList = new List<Model.IBaseData.IBaseData>();
             string dnString = "";
 
-            List<IBaseData> IBaseData = new List<IBaseData>();
+            List<IBaseDatum> IBaseData = new List<IBaseDatum>();
             if (IBaseDataDNList != null && IBaseDataDNList.Count > 0)
             {
                 dnString = string.Join(",", IBaseDataDNList.Select(x => x.DN)).TrimEnd(',');
@@ -132,7 +126,7 @@ namespace SntraxWebAPI.Controllers
             string snString = Regex.Replace(innerObject, @"\s+", string.Empty);
 
             SntraxService sntraxService = new SntraxService();
-            List<IBaseData> IBaseData = new List<IBaseData>();
+            List<Model.IBaseData.IBaseData> IBaseData = new List<Model.IBaseData.IBaseData>();
 
             if (snString != "")
             {
@@ -145,7 +139,7 @@ namespace SntraxWebAPI.Controllers
                            new SqlParameter("@param_sn",snString),
                           };
                     dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_INT_IBASE_GET_SN, param);
-                    List<IBaseData> iBaseList = sntraxService.getIbaseData(dataSet, false);
+                    List<Model.IBaseData.IBaseData> iBaseList = sntraxService.getIbaseData(dataSet, false);
                     stringwriter = sntraxService.Serialize(iBaseList);
                     FinalDNXml = string.Format(_iBaseGetSingleDataXML, sntraxService.ReplaceXmlTag(stringwriter, "IBaseGetSingleData"));
                 }
@@ -226,7 +220,7 @@ namespace SntraxWebAPI.Controllers
             stopwatch.Start();
             string sDBName = string.Empty;
             string FinalEIMRmaXml = string.Empty;
-            List<GetEIMRmaResult> getEIMRmaResult = new List<GetEIMRmaResult>();
+            List<get_EIMRmaResult> getEIMRmaResult = new List<get_EIMRmaResult>();
 
             try
             {
@@ -241,7 +235,7 @@ namespace SntraxWebAPI.Controllers
                 dataSet = Repo.GetDataSet(sDBName, AppConstants.SP_IN_EIM_GET_SHIPRMA_DATA, param);
                 getEIMRmaResult = sntraxService.getEIMRmaResult(dataSet, SerialNumber);
                 string stringwriter = sntraxService.Serialize(getEIMRmaResult);
-                FinalEIMRmaXml = string.Format(_DNXML, sntraxService.ReplaceXmlTag(stringwriter, "get_EIMRma"));
+                FinalEIMRmaXml = string.Format(_eimRmaXML, sntraxService.ReplaceXmlTag(stringwriter, "get_EIMRma"));
 
             }
             catch (Exception ex)
@@ -403,9 +397,6 @@ namespace SntraxWebAPI.Controllers
             var FinalDNXml1 = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter, ""));
             return FinalDNXml1;
         }
-
-
-
 
         [HttpPost]
         [Route("Get_r4cSntraxOrchs_SearchByMultipleSN")]

@@ -114,7 +114,7 @@ namespace SntraxWebAPI.Services
             }
             else if (methodName == "get_EIMRma")
             {
-                returnXmlstring = xmlstring.ToString().Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "").Replace("<ArrayOfGetEIMRmaResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfGetEIMRmaResult>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+                returnXmlstring = xmlstring.ToString().Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "").Replace("<ArrayOfGet_EIMRmaResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfGet_EIMRmaResult>", "");
             }
             else if (methodName == "SearchByMultipleDN")
             {
@@ -128,13 +128,13 @@ namespace SntraxWebAPI.Services
             return returnXmlstring.ToString();
         }
 
-        public List<GetEIMRmaResult> getEIMRmaResult(DataSet dataSet, string SerialNumber)
+        public List<get_EIMRmaResult> getEIMRmaResult(DataSet dataSet, string SerialNumber)
         {
 
             DataTable dtEIMRma = new DataTable();
             DataTable dtPartNumberList = new DataTable();
-            List<GetEIMRmaResult> getEIMRmaList = new List<GetEIMRmaResult>();
-            List<PartNumberList> partNumberList = new List<PartNumberList>();
+            List<get_EIMRmaResult> getEIMRmaList = new List<get_EIMRmaResult>();
+            DateTime dtShipDate;
             try
             {
                 if (dataSet.Tables.Count > 0)
@@ -143,23 +143,24 @@ namespace SntraxWebAPI.Services
                     dtPartNumberList = dataSet.Tables[1];
                     for (int i = 0; i < dtEIMRma.Rows.Count; i++)
                     {
-                        GetEIMRmaResult getEIMRma = new GetEIMRmaResult();
-                        getEIMRma.ShipDate = string.Format("{0:MM/dd/yyyy hh:mm:ss tt}", dtEIMRma.Rows[i]["shipdate"].ToString());
+                        get_EIMRmaResult getEIMRma = new get_EIMRmaResult();
+                        dtShipDate = Convert.ToDateTime(dtEIMRma.Rows[i]["shipdate"].ToString());
+                        getEIMRma.ShipDate = string.Format("{0:MM/dd/yyyy hh:mm:ss tt}", dtShipDate);
                         getEIMRma.CountryCode = dtEIMRma.Rows[i]["country_code"].ToString();
                         getEIMRma.ReturnFrequency = int.Parse(dtEIMRma.Rows[i]["frequency"].ToString());
                         getEIMRma.ProcessCode = int.Parse(dtEIMRma.Rows[i]["process_code"].ToString());
                         getEIMRma.ReplacementFrequency = int.Parse(dtEIMRma.Rows[i]["rfrequency"].ToString());
                         getEIMRma.StolenProduct = dtEIMRma.Rows[i]["stolen_prod"].ToString();
                         getEIMRma.SerialNumber = SerialNumber;
+                        getEIMRma.PartNumberList = new List<string>();
+                        for (int j = 0; j < dtPartNumberList.Rows.Count; j++)
+                        {
+                            getEIMRma.PartNumberList.Add(dtPartNumberList.Rows[j]["PartNum"].ToString());
+                        }
                         getEIMRmaList.Add(getEIMRma);
                     }
-                    for (int j = 0; j < dtPartNumberList.Rows.Count; j++)
-                    {
-                        PartNumberList pt = new PartNumberList();
-                        pt.PartNumber.Add(dtPartNumberList.Rows[j]["PartNum"].ToString());
-                        partNumberList.Add(pt);
-                    }
-                    getEIMRmaList[0].PartNumberList = partNumberList;
+                   
+                   
                     //ship.CountryCode = sqlReader.GetValue(1).ToString();
                     //ship.ReturnFrequency = Int32.Parse(sqlReader.GetValue(2).ToString());
                     //ship.ProcessCode = Int32.Parse(sqlReader.GetValue(3).ToString());
