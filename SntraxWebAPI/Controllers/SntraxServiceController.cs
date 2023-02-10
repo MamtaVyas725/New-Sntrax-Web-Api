@@ -31,7 +31,7 @@ namespace SntraxWebAPI.Controllers
         private string _outerDNXML = string.Empty;
         private string _validate_SSD_CPU_ShipToResponseOuterXML = string.Empty;
         private string _iBaseGetSingleDataXML = string.Empty;
-        private string _multipleSNXML = string.Empty;
+        private string _multipleSNOuterXML = string.Empty;
         private string _multipleDNOuterXML = string.Empty;
         private static int dbSuccess = -1;
 
@@ -56,7 +56,7 @@ namespace SntraxWebAPI.Controllers
             _emailSender = _rootObjectCommon.GetValue<string>("EmailConfiguration:emailSender");
             _outerDNXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:OuterXML");
             _eIMRmaXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:EIMRmaXML");
-            _multipleSNXML = _rootObjectCommon.GetValue<string>("XmlDNConfiguration:MultipleSNXML");
+            _multipleSNOuterXML = _rootObjectCommon.GetValue<string>("OuterXml:SearchByMultipleSNXML");
             _DNXML = _rootObjectCommon.GetValue<string>("OuterXml:DNXML");
             _iBaseGetSingleDataXML = _rootObjectCommon.GetValue<string>("OuterXML:IBaseGetSingleDataXML");
             _validate_SSD_CPU_ShipToResponseOuterXML = _rootObjectCommon.GetValue<string>("OuterXml:Validate_SSD_CPU_ShipToResponseXML");
@@ -133,7 +133,7 @@ namespace SntraxWebAPI.Controllers
 
             SntraxService sntraxService = new SntraxService();
             List<IBaseData> IBaseData = new List<IBaseData>();
-           
+
             if (snString != "")
             {
                 try
@@ -421,9 +421,9 @@ namespace SntraxWebAPI.Controllers
             string innerObject = soapBody.InnerXml;
             var myJsonResponse = Repo.XmlToJson(innerObject);
             var r = myJsonResponse.Replace("\"SNList\":{", "\"SNList\":[{").Replace("}}}", "}]}}");
-            SearchByMultipleSNList myDeserializedClass = JsonConvert.DeserializeObject<SearchByMultipleSNList>(r);
-            var SNList = myDeserializedClass.SNList.ToList();
-            List<ClsOLDataByMultipleSN> returnList = new List<ClsOLDataByMultipleSN>();
+            GetR4cSntraxOrchsSearchByMultipleSN myDeserializedClass = JsonConvert.DeserializeObject<GetR4cSntraxOrchsSearchByMultipleSN>(myJsonResponse);
+            var SNList = myDeserializedClass.list.SNList.ToList();
+            List<cls_OL_DataByMultipleSN> returnList = new List<cls_OL_DataByMultipleSN>();
             string snString = "";
 
             if (SNList != null && SNList.Count > 0)
@@ -438,14 +438,14 @@ namespace SntraxWebAPI.Controllers
                     dbSuccess = Repo.ConnectToRetry(ref sDBName, _dbRetry);
                     if (dbSuccess == 0)
                     {
-                        DataTable dataTable = new DataTable();
+                        DataSet dataSet = new DataSet();
                         SqlParameter[] param = {
                            new SqlParameter("@param_sn",snString),
                           };
-                        dataTable = Repo.GetDataTable(sDBName, AppConstants.SPGET_R4C_SNTRAX_ORCHS_SEARCH_BY_SN, param);
-                        returnList = sntraxService.getDataByMultipleSN(dataTable, true);
+                        dataSet = Repo.GetDataSet(sDBName, AppConstants.SPGET_R4C_SNTRAX_ORCHS_SEARCH_BY_SN, param);
+                        returnList = sntraxService.getDataByMultipleSN(dataSet);
                         stringwriter = sntraxService.Serialize(returnList);
-                        FinalDNXml = string.Format(_multipleSNXML, sntraxService.ReplaceXmlTag(stringwriter, ""));
+                        FinalDNXml = string.Format(_multipleSNOuterXML, sntraxService.ReplaceXmlTag(stringwriter, "SearchByMultipleSN"));
                     }
                 }
                 catch (Exception ex)

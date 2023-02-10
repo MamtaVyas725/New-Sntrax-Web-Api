@@ -121,7 +121,7 @@ namespace SntraxWebAPI.Services
             }
             else if (methodName == "SearchByMultipleSN")
             {
-                returnXmlstring = xmlstring.ToString().Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "").Replace("<ArrayOfClsOLDataByMultipleSN xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<Get_r4cSntraxOrchs_SearchByMultipleSNResult>").Replace("</ArrayOfClsOLDataByMultipleSN>", "</Get_r4cSntraxOrchs_SearchByMultipleSNResult>");
+                returnXmlstring = xmlstring.ToString().Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "").Replace("<ArrayOfCls_OL_DataByMultipleSN xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<Get_r4cSntraxOrchs_SearchByMultipleSNResult>").Replace("</ArrayOfCls_OL_DataByMultipleSN>", "</Get_r4cSntraxOrchs_SearchByMultipleSNResult>");
             }
 
             return returnXmlstring.ToString();
