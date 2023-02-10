@@ -1,5 +1,6 @@
 ﻿using EnttlOrchestrationLayer.Utilities;
 using SntraxWebAPI.Model;
+using SntraxWebAPI.Model.IBaseData;
 using SntraxWebAPI.Model.SearchByMultipleDN;
 using SntraxWebAPI.Utilities;
 using System.Data;
@@ -113,7 +114,7 @@ namespace SntraxWebAPI.Services
             }
             else if (methodName == "get_EIMRma")
             {
-                returnXmlstring = returnXmlstring.ToString().Replace("<ArrayOfGetEIMRmaResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfGetEIMRmaResult>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
+                returnXmlstring = xmlstring.ToString().Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "").Replace("<ArrayOfGetEIMRmaResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "").Replace("</ArrayOfGetEIMRmaResult>", "").Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "");
             }
             else if (methodName == "SearchByMultipleDN")
             {

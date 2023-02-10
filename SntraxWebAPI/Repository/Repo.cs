@@ -31,7 +31,7 @@ namespace SntraxWebAPI.Repository
                     cmd.Connection = conn;
                     cmd.CommandText = procedureName;
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandTimeout = 0; 
+                    cmd.CommandTimeout = Convert.ToInt32(AppConstants.DB_MAX_TIMEOUT); 
                     cmd.Parameters.Clear();
                     if (commandParameters != null)
                     {
@@ -74,7 +74,8 @@ namespace SntraxWebAPI.Repository
                     cmd.Connection = conn;
                     cmd.CommandText = procedureName;
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandTimeout = procedureName == AppConstants.SP_IN_SSD_GET_SHIPTORESULT || procedureName == AppConstants.SPGET_R4C_SNTRAX_ORCHS_SEARCH_BY_SN
+                    cmd.CommandTimeout = ( procedureName == AppConstants.SP_IN_SSD_GET_SHIPTORESULT || procedureName == AppConstants.SPGET_R4C_SNTRAX_ORCHS_SEARCH_BY_SN ||
+                        procedureName == AppConstants.SP_INT_IBASE_GET_SN || procedureName == AppConstants.SP_IN_EIM_GET_SHIPRMA_DATA )
                         ? Convert.ToInt32(AppConstants.DB_MAX_TIMEOUT) : 0;
                     cmd.Parameters.Clear();
                     if (commandParameters != null)
@@ -93,11 +94,11 @@ namespace SntraxWebAPI.Repository
                 CLogger.LogInfo(methodName + " exception : " + ex.Message);
                 throw new Exception(AppConstants.DATABASE);
             }
-            finally
-            {
-                if (dataSet != null)
-                    dataSet.Dispose();
-            }
+            //finally
+            //{
+            //    if (dataSet != null)
+            //        dataSet.Dispose();
+            //}
             stopwatch.Stop();
             CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
             return dataSet;
