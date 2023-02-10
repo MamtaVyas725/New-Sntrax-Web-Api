@@ -31,7 +31,7 @@ namespace SntraxWebAPI.Repository
                     cmd.Connection = conn;
                     cmd.CommandText = procedureName;
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandTimeout = 0;
+                    cmd.CommandTimeout = 0; 
                     cmd.Parameters.Clear();
                     if (commandParameters != null)
                     {
@@ -74,7 +74,8 @@ namespace SntraxWebAPI.Repository
                     cmd.Connection = conn;
                     cmd.CommandText = procedureName;
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandTimeout = procedureName == AppConstants.SP_IN_SSD_GET_SHIPTORESULT ? Convert.ToInt32(AppConstants.DB_MAX_TIMEOUT) : 0;
+                    cmd.CommandTimeout = procedureName == AppConstants.SP_IN_SSD_GET_SHIPTORESULT || procedureName == AppConstants.SPGET_R4C_SNTRAX_ORCHS_SEARCH_BY_SN
+                        ? Convert.ToInt32(AppConstants.DB_MAX_TIMEOUT) : 0;
                     cmd.Parameters.Clear();
                     if (commandParameters != null)
                     {

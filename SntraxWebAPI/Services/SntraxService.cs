@@ -119,6 +119,10 @@ namespace SntraxWebAPI.Services
             {
                 returnXmlstring = xmlstring.ToString().Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "").Replace("<ArrayOfCls_r4cSntraxOrchs_DataByMultipleDN xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<Get_r4cSntraxOrchs_SearchByMultipleDNResult>").Replace("</ArrayOfCls_r4cSntraxOrchs_DataByMultipleDN>", "</Get_r4cSntraxOrchs_SearchByMultipleDNResult>");
             }
+            else if (methodName == "SearchByMultipleSN")
+            {
+                returnXmlstring = xmlstring.ToString().Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "").Replace("<ArrayOfClsOLDataByMultipleSN xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<Get_r4cSntraxOrchs_SearchByMultipleSNResult>").Replace("</ArrayOfClsOLDataByMultipleSN>", "</Get_r4cSntraxOrchs_SearchByMultipleSNResult>");
+            }
 
             return returnXmlstring.ToString();
         }
@@ -305,38 +309,44 @@ namespace SntraxWebAPI.Services
             return msg_rtn;
         }
 
-        public List<ClsOLDataByMultipleSN> getDataByMultipleSN(DataTable dataTable, bool isDN)
+        public List<cls_OL_DataByMultipleSN> getDataByMultipleSN(DataSet dataSet)
         {
             string methodName = "getIbaseData";
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            List<ClsOLDataByMultipleSN> returnList = new List<ClsOLDataByMultipleSN>();
+            List<cls_OL_DataByMultipleSN> returnList = new List<cls_OL_DataByMultipleSN>();
             try
             {
-                for (int i = 0; i < dataTable.Rows.Count; i++)
+                if (dataSet.Tables.Count > 0)
                 {
-                    ClsOLDataByMultipleSN item = new ClsOLDataByMultipleSN();
-                    item.ULTID = dataTable.Rows[i]["ULTID"].ToString();
-                    item.MMID = dataTable.Rows[i]["MMID"].ToString();
-                    item.Shipdate = dataTable.Rows[i]["Shipdate"].ToString();
-                    item.DeliveryNote = dataTable.Rows[i]["DeliveryNote"].ToString();
-                    item.Spec_cd = dataTable.Rows[i]["Spec_cd"].ToString();
-                    item.Product_Code = dataTable.Rows[i]["Product_Code"].ToString();
-                    item.Sales_Org = dataTable.Rows[i]["MSales_OrgMID"].ToString();
-                    item.Dist_Channel = dataTable.Rows[i]["Dist_Channel"].ToString();
-                    item.ShipToId = dataTable.Rows[i]["ShipToId"].ToString();
-                    item.ShiptoName = dataTable.Rows[i]["ShiptoName"].ToString();
-                    item.SoldtoId = dataTable.Rows[i]["SoldtoId"].ToString();
-                    item.SoldtoName = dataTable.Rows[i]["SoldtoName"].ToString();
-                    item.Status = string.IsNullOrWhiteSpace(dataTable.Rows[i]["MMID"].ToString()) ? "NF" : "F";
-                    returnList.Add(item);
+                    DataTable dataTable = new DataTable();
+                    dataTable = dataSet.Tables[0];
+
+                    for (int i = 0; i < dataTable.Rows.Count; i++)
+                    {
+                        cls_OL_DataByMultipleSN item = new cls_OL_DataByMultipleSN();
+                        item.ULTID = dataTable.Rows[i]["ULTID"].ToString();
+                        item.MMID = dataTable.Rows[i]["MMID"].ToString();
+                        item.Shipdate = dataTable.Rows[i]["Shipdate"].ToString();
+                        item.DeliveryNote = dataTable.Rows[i]["DeliveryNote"].ToString();
+                        item.Spec_cd = dataTable.Rows[i]["Spec_cd"].ToString();
+                        item.Product_Code = dataTable.Rows[i]["Product_Code"].ToString();
+                        item.Sales_Org = dataTable.Rows[i]["Sales_Org"].ToString();
+                        item.Dist_Channel = dataTable.Rows[i]["Dist_Channel"].ToString();
+                        item.ShipToId = dataTable.Rows[i]["ShipToId"].ToString();
+                        item.ShiptoName = dataTable.Rows[i]["ShiptoName"].ToString();
+                        item.SoldtoId = dataTable.Rows[i]["SoldtoId"].ToString();
+                        item.SoldtoName = dataTable.Rows[i]["SoldtoName"].ToString();
+                        item.Status = string.IsNullOrWhiteSpace(dataTable.Rows[i]["MMID"].ToString()) ? "NF" : "F";
+                        returnList.Add(item);
+                    }
                 }
 
             }
             catch (Exception ex)
             {
-                //  clsSendMail sm = new clsSendMail("Get_r4cSntraxOrchs_SearchByMultipleSN", Environment.MachineName);
-                // sm.SendEmail(eX.Message.ToString());
+                SendMail sm = new SendMail("Get_r4cSntraxOrchs_SearchByMultipleSN", Environment.MachineName);
+                sm.SendEmail(ex.Message.ToString());
                 CLogger.LogInfo(methodName + " exception : " + ex.Message);
             }
             stopwatch.Stop();
