@@ -40,7 +40,7 @@
 
     #region output
     // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
-    public class ClsOLDataByMultipleSN
+    public class cls_OL_DataByMultipleSN
     {
         public string ULTID { get; set; }
         public string MMID { get; set; }
@@ -59,7 +59,7 @@
 
     public class GetR4cSntraxOrchsSearchByMultipleSNResult
     {
-        public ClsOLDataByMultipleSN cls_OL_DataByMultipleSN { get; set; }
+        public cls_OL_DataByMultipleSN cls_OL_DataByMultipleSN { get; set; }
     }
 
     public class SearchByMultipleSNOutput
