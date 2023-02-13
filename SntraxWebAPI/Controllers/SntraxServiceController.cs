@@ -411,7 +411,7 @@ namespace SntraxWebAPI.Controllers
             var soapBody = doc.GetElementsByTagName("Get_r4cSntraxOrchs_SearchByMultipleSN")[0];
             string innerObject = soapBody.InnerXml;
             var myJsonResponse = Repo.XmlToJson(innerObject);
-            var r = myJsonResponse.Replace("\"SNList\":{", "\"SNList\":[{").Replace("}}}", "}]}}");
+            myJsonResponse = myJsonResponse.Replace("\"SNList\":{", "\"SNList\":[{").Replace("}}}", "}]}}");
             GetR4cSntraxOrchsSearchByMultipleSN myDeserializedClass = JsonConvert.DeserializeObject<GetR4cSntraxOrchsSearchByMultipleSN>(myJsonResponse);
             var SNList = myDeserializedClass.list.SNList.ToList();
             List<cls_OL_DataByMultipleSN> returnList = new List<cls_OL_DataByMultipleSN>();
@@ -464,6 +464,7 @@ namespace SntraxWebAPI.Controllers
             var soapBody = doc.GetElementsByTagName("Get_r4cSntraxOrchs_SearchByMultipleDN")[0];
             string innerObject = soapBody.InnerXml;
             var myJsonResponse = Repo.XmlToJson(innerObject);
+            myJsonResponse = myJsonResponse.Replace("\"DNList\":{", "\"DNList\":[{").Replace("}}}", "}]}}");
             GetR4cSntraxOrchsSearchByMultipleDN myDeserializedClass = JsonConvert.DeserializeObject<GetR4cSntraxOrchsSearchByMultipleDN>(myJsonResponse);
             var DNList = myDeserializedClass.list.DNList.ToList();
             List<cls_r4cSntraxOrchs_DataByMultipleDN> returnList = new List<cls_r4cSntraxOrchs_DataByMultipleDN>();

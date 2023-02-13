@@ -94,11 +94,11 @@ namespace SntraxWebAPI.Repository
                 CLogger.LogInfo(methodName + " exception : " + ex.Message);
                 throw new Exception(AppConstants.DATABASE);
             }
-            //finally
-            //{
-            //    if (dataSet != null)
-            //        dataSet.Dispose();
-            //}
+            finally
+            {
+                if (dataSet != null)
+                    dataSet.Dispose();
+            }
             stopwatch.Stop();
             CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
             return dataSet;
