@@ -12,7 +12,7 @@
 
     public class IBaseDatum
     {
-        public int DN { get; set; }
+        public string DN { get; set; }
     }
 
     public class IBaseGetDataByDN
