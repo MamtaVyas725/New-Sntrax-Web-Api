@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using SntraxWebAPI.Utilities;
 using SntraxWebAPI.Model.SearchByMultipleDN;
 using SntraxWebAPI.Model.IBaseGetDataByDN;
+using System.Text;
 
 namespace SntraxWebAPI.Controllers
 {
@@ -48,7 +49,7 @@ namespace SntraxWebAPI.Controllers
             _constrSecondary = _rootObjectCommon.GetValue<string>("ConnectionStrings:ConstrSecondry");
             Repo.connStringPrimary = _constrPrimary;
             Repo.connStringSecondary = _constrSecondary;
-            _dbRetry = _rootObjectCommon.GetValue<string>("EmailConfiguration:dbRetry");            
+            _dbRetry = _rootObjectCommon.GetValue<string>("EmailConfiguration:dbRetry");
             _outerDNXML = _rootObjectCommon.GetValue<string>("OuterXml:DNXML");
             _eimRmaXML = _rootObjectCommon.GetValue<string>("OuterXml:EIMRmaXML");
             _multipleSNOuterXML = _rootObjectCommon.GetValue<string>("OuterXml:SearchByMultipleSNXML");
@@ -62,7 +63,8 @@ namespace SntraxWebAPI.Controllers
 
         [HttpPost]
         [Route("IBaseGetDataByDN")]
-        public string IBaseGetDataByDN(XmlDocument doc)
+        [Produces("application/xml")]
+        public XmlDocument IBaseGetDataByDN(XmlDocument doc)
         {
             string methodName = "IBaseGetDataByDN";
             Stopwatch stopwatch = new Stopwatch();
@@ -73,6 +75,7 @@ namespace SntraxWebAPI.Controllers
             var soapBody = doc.GetElementsByTagName("IBaseGetDataByDN")[0];
             string innerObject = soapBody.InnerXml;
             var myJsonResponse = Repo.XmlToJson(innerObject);
+            myJsonResponse = myJsonResponse.Replace("\"IBaseData\":{", "\"IBaseData\":[{").Replace("}}}", "}]}}");
             IBaseGetDataByDN myDeserializedClass = JsonConvert.DeserializeObject<IBaseGetDataByDN>(myJsonResponse);
             var IBaseDataDNList = myDeserializedClass.list.IBaseData.ToList();
             List<Model.IBaseData.IBaseData> returnList = new List<Model.IBaseData.IBaseData>();
@@ -108,12 +111,15 @@ namespace SntraxWebAPI.Controllers
                 stopwatch.Stop();
                 CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
             }
-            return FinalDNXml;
+            XmlDocument xdn = new XmlDocument();
+            xdn.LoadXml(FinalDNXml);
+            return xdn;
         }
 
         [HttpPost]
         [Route("IBaseGetSingleData")]
-        public string IBaseGetSingleData(XmlDocument doc)
+        [Produces("application/xml")]
+        public XmlDocument IBaseGetSingleData(XmlDocument doc)
         {
             string methodName = "IBaseGetSingleData";
             Stopwatch stopwatch = new Stopwatch();
@@ -150,13 +156,17 @@ namespace SntraxWebAPI.Controllers
                 stopwatch.Stop();
                 CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
             }
-            return FinalDNXml;
+            XmlDocument xsn = new XmlDocument();
+            xsn.LoadXml(FinalDNXml);
+            return xsn;
+           
         }
 
         [HttpPost]
         [Route("Validate_SSD_CPU_ShipTo")]
         [ResponseCache(Duration = 30)]
-        public string Validate_SSD_CPU_ShipTo(string RequestType, string RequestValue)
+        [Produces("application/xml")]
+        public XmlDocument Validate_SSD_CPU_ShipTo(string RequestType, string RequestValue)
         {
             ShipToResult result = new ShipToResult();
             string sDBName = string.Empty;
@@ -208,12 +218,15 @@ namespace SntraxWebAPI.Controllers
             }
             //SendMail sm1 = new SendMail("Validate_SSD_CPU_ShipTo", Environment.MachineName);
             //sm1.SendEmail("Validate_SSD_CPU_ShipTo");
-            return FinalDNXml;
+            XmlDocument xdn = new XmlDocument();
+            xdn.LoadXml(FinalDNXml);
+            return xdn;
         }
 
         [HttpPost]
         [Route("get_EIMRma")]
-        public string get_EIMRma(XmlDocument doc)
+        [Produces("application/xml")]
+        public XmlDocument get_EIMRma(XmlDocument doc)
         {
             string methodName = "IBaseGetDataByDN";
             Stopwatch stopwatch = new Stopwatch();
@@ -244,13 +257,16 @@ namespace SntraxWebAPI.Controllers
             }
             stopwatch.Stop();
             CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
-
-            return FinalEIMRmaXml;
+            XmlDocument xdn = new XmlDocument();
+            xdn.LoadXml(FinalEIMRmaXml);
+            return xdn;
+            //return FinalEIMRmaXml;
         }
 
         [HttpPost]
         [Route("UploadSNv6")]
-        public string UploadSNv6(XmlDocument doc)
+        [Produces("application/xml")]
+        public XmlDocument UploadSNv6(XmlDocument doc)
         {
 
             string methodName = "UploadSNv6";
@@ -395,12 +411,16 @@ namespace SntraxWebAPI.Controllers
 
             stringwriter = sntraxService.Serialize(_rtnList);
             var FinalDNXml1 = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter, ""));
-            return FinalDNXml1;
+            //return FinalDNXml1;
+            XmlDocument xdn = new XmlDocument();
+            xdn.LoadXml(FinalDNXml1);
+            return xdn;
         }
 
         [HttpPost]
         [Route("Get_r4cSntraxOrchs_SearchByMultipleSN")]
-        public string Get_r4cSntraxOrchs_SearchByMultipleSN(XmlDocument doc)
+        [Produces("application/xml")]
+        public XmlDocument Get_r4cSntraxOrchs_SearchByMultipleSN(XmlDocument doc)
         {
             string methodName = "Get_r4cSntraxOrchs_SearchByMultipleSN";
             Stopwatch stopwatch = new Stopwatch();
@@ -446,13 +466,16 @@ namespace SntraxWebAPI.Controllers
                 stopwatch.Stop();
                 CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
             }
-            return FinalDNXml;
+            XmlDocument xdn = new XmlDocument();
+            xdn.LoadXml(FinalDNXml);
+            return xdn;
         }
 
 
         [HttpPost]
         [Route("Get_r4cSntraxOrchs_SearchByMultipleDN")]
-        public string Get_r4cSntraxOrchs_SearchByMultipleDN(XmlDocument doc)
+        [Produces("application/xml")]
+        public XmlDocument Get_r4cSntraxOrchs_SearchByMultipleDN(XmlDocument doc)
         {
             string methodName = "Get_r4cSntraxOrchs_SearchByMultipleDN";
             Stopwatch stopwatch = new Stopwatch();
@@ -501,8 +524,9 @@ namespace SntraxWebAPI.Controllers
                 stopwatch.Stop();
                 CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
             }
-
-            return FinalDNXml;
+            XmlDocument xdn = new XmlDocument();
+            xdn.LoadXml(FinalDNXml);
+            return xdn;
         }
 
     }
