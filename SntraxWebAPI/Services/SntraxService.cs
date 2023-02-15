@@ -130,7 +130,9 @@ namespace SntraxWebAPI.Services
 
         public List<get_EIMRmaResult> getEIMRmaResult(DataSet dataSet, string SerialNumber)
         {
-
+            string methodName = "getEIMRmaResult";
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             DataTable dtEIMRma = new DataTable();
             DataTable dtPartNumberList = new DataTable();
             List<get_EIMRmaResult> getEIMRmaList = new List<get_EIMRmaResult>();
@@ -159,21 +161,14 @@ namespace SntraxWebAPI.Services
                         }
                         getEIMRmaList.Add(getEIMRma);
                     }
-                   
-                   
-                    //ship.CountryCode = sqlReader.GetValue(1).ToString();
-                    //ship.ReturnFrequency = Int32.Parse(sqlReader.GetValue(2).ToString());
-                    //ship.ProcessCode = Int32.Parse(sqlReader.GetValue(3).ToString());
-                    //ship.ReplacementFrequency = Int32.Parse(sqlReader.GetValue(4).ToString()); ////ADD SRIKANTH
-                    //ship.StolenProduct = sqlReader.GetValue(5).ToString(); ////ADD SRIKANTH
-
-
                 }
             }
             catch (Exception ex)
             {
-
+                CLogger.LogInfo(methodName + " exception : " + ex.Message);
             }
+            stopwatch.Stop();
+            CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
 
             return getEIMRmaList;
         }
@@ -313,7 +308,7 @@ namespace SntraxWebAPI.Services
 
         public List<cls_OL_DataByMultipleSN> getDataByMultipleSN(DataSet dataSet)
         {
-            string methodName = "getIbaseData";
+            string methodName = "getDataByMultipleSN";
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             List<cls_OL_DataByMultipleSN> returnList = new List<cls_OL_DataByMultipleSN>();
@@ -347,19 +342,19 @@ namespace SntraxWebAPI.Services
             }
             catch (Exception ex)
             {
-                SendMail sm = new SendMail("Get_r4cSntraxOrchs_SearchByMultipleSN", Environment.MachineName);
-                sm.SendEmail(ex.Message.ToString());
                 CLogger.LogInfo(methodName + " exception : " + ex.Message);
             }
             stopwatch.Stop();
             CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
-
             return returnList;
         }
 
 
         public ShipToResult GetShippingDetails(DataSet dataSet)
         {
+            string methodName = "GetShippingDetails";
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             ShipToResult shipResult = new()
             {
                 RecordFound = 0 //default or record not found
@@ -380,10 +375,12 @@ namespace SntraxWebAPI.Services
                     shipResult.CustomerRegion = (dtCustomerDetails.Rows[0].Field<string>(6) ?? "");
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                CLogger.LogInfo(methodName + " exception : " + ex.Message);
             }
+            stopwatch.Stop();
+            CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
             return shipResult;
         }
 
@@ -419,8 +416,5 @@ namespace SntraxWebAPI.Services
             CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
             return returnList;
         }
-
-
-
     }
 }

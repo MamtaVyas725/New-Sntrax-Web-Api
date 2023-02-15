@@ -1,6 +1,6 @@
 ﻿using EnttlOrchestrationLayer.Utilities;
-using System.Net;
 using System.Net.Mail;
+
 
 namespace SntraxWebAPI.Utilities
 {
@@ -42,10 +42,11 @@ namespace SntraxWebAPI.Utilities
 
                 var client = new SmtpClient();
                 client.Host = mailServer;
-                //client.Port = 465;
-                //client.EnableSsl = true;
-                //client.Credentials = new NetworkCredential("your_username", "your_password");
+                client.Port = 465;
+                client.EnableSsl = true;
+               // client.Credentials = new NetworkCredential("your_username", "your_password");
                 client.Send(message);
+
             }
             catch (Exception ex)
             {
@@ -53,4 +54,5 @@ namespace SntraxWebAPI.Utilities
             }
         }
     }
+
 }

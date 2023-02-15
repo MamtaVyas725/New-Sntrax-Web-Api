@@ -12,7 +12,8 @@ using System.Text.RegularExpressions;
 using SntraxWebAPI.Utilities;
 using SntraxWebAPI.Model.SearchByMultipleDN;
 using SntraxWebAPI.Model.IBaseGetDataByDN;
-using System.Text;
+
+
 
 namespace SntraxWebAPI.Controllers
 {
@@ -81,6 +82,7 @@ namespace SntraxWebAPI.Controllers
             List<Model.IBaseData.IBaseData> returnList = new List<Model.IBaseData.IBaseData>();
             string dnString = "";
 
+
             List<IBaseDatum> IBaseData = new List<IBaseDatum>();
             if (IBaseDataDNList != null && IBaseDataDNList.Count > 0)
             {
@@ -106,6 +108,8 @@ namespace SntraxWebAPI.Controllers
                 }
                 catch (Exception ex)
                 {
+                    SendMail sm = new SendMail(methodName, Environment.MachineName);
+                    sm.SendEmail(ex.Message.ToString());
                     CLogger.LogInfo(methodName + " exception : " + ex.Message);
                 }
                 stopwatch.Stop();
@@ -151,6 +155,8 @@ namespace SntraxWebAPI.Controllers
                 }
                 catch (Exception ex)
                 {
+                    SendMail sm = new SendMail(methodName, Environment.MachineName);
+                    sm.SendEmail(ex.Message.ToString());
                     CLogger.LogInfo(methodName + " exception : " + ex.Message);
                 }
                 stopwatch.Stop();
@@ -159,7 +165,7 @@ namespace SntraxWebAPI.Controllers
             XmlDocument xsn = new XmlDocument();
             xsn.LoadXml(FinalDNXml);
             return xsn;
-           
+
         }
 
         [HttpPost]
@@ -168,6 +174,9 @@ namespace SntraxWebAPI.Controllers
         [Produces("application/xml")]
         public XmlDocument Validate_SSD_CPU_ShipTo(string RequestType, string RequestValue)
         {
+            string methodName = "Validate_SSD_CPU_ShipTo";
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             ShipToResult result = new ShipToResult();
             string sDBName = string.Empty;
             string stringwriter = string.Empty;
@@ -212,12 +221,13 @@ namespace SntraxWebAPI.Controllers
             }
             catch (Exception ex)
             {
-                SendMail sm = new SendMail("Validate_SSD_CPU_ShipTo", Environment.MachineName);
+                SendMail sm = new SendMail(methodName, Environment.MachineName);
                 sm.SendEmail(ex.Message.ToString());
+                CLogger.LogInfo(methodName + " exception : " + ex.Message);
                 result.RecordFound = 2;
             }
-            //SendMail sm1 = new SendMail("Validate_SSD_CPU_ShipTo", Environment.MachineName);
-            //sm1.SendEmail("Validate_SSD_CPU_ShipTo");
+            stopwatch.Stop();
+            CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
             XmlDocument xdn = new XmlDocument();
             xdn.LoadXml(FinalDNXml);
             return xdn;
@@ -253,6 +263,8 @@ namespace SntraxWebAPI.Controllers
             }
             catch (Exception ex)
             {
+                SendMail sm = new SendMail(methodName, Environment.MachineName);
+                sm.SendEmail(ex.Message.ToString());
                 CLogger.LogInfo(methodName + " exception : " + ex.Message);
             }
             stopwatch.Stop();
@@ -260,7 +272,6 @@ namespace SntraxWebAPI.Controllers
             XmlDocument xdn = new XmlDocument();
             xdn.LoadXml(FinalEIMRmaXml);
             return xdn;
-            //return FinalEIMRmaXml;
         }
 
         [HttpPost]
@@ -382,10 +393,10 @@ namespace SntraxWebAPI.Controllers
                             };
                                 Repo.ExecuteNonQuery(sDBName, AppConstants.SP_INT_WS_INSERT_BUILD_UPLOAD, param);
                             }
-                            catch (Exception eX)
+                            catch (Exception ex)
                             {
-                                //    clsSendMail sm = new clsSendMail("UploadSNv6", Environment.MachineName);
-                                //    sm.SendEmail(eX.Message.ToString());
+                                SendMail sm = new SendMail(methodName, Environment.MachineName);
+                                sm.SendEmail(ex.Message.ToString());
                             }
 
                             //Assign component to return component
@@ -406,12 +417,14 @@ namespace SntraxWebAPI.Controllers
             }
             catch (Exception ex)
             {
-
+                SendMail sm = new SendMail(methodName, Environment.MachineName);
+                sm.SendEmail(ex.Message.ToString());
+                CLogger.LogInfo(methodName + " exception : " + ex.Message);
             }
-
+            stopwatch.Stop();
+            CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
             stringwriter = sntraxService.Serialize(_rtnList);
             var FinalDNXml1 = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter, ""));
-            //return FinalDNXml1;
             XmlDocument xdn = new XmlDocument();
             xdn.LoadXml(FinalDNXml1);
             return xdn;
@@ -461,6 +474,8 @@ namespace SntraxWebAPI.Controllers
                 }
                 catch (Exception ex)
                 {
+                    SendMail sm = new SendMail(methodName, Environment.MachineName);
+                    sm.SendEmail(ex.Message.ToString());
                     CLogger.LogInfo(methodName + " exception : " + ex.Message);
                 }
                 stopwatch.Stop();
@@ -518,7 +533,7 @@ namespace SntraxWebAPI.Controllers
                 catch (Exception ex)
                 {
                     CLogger.LogInfo(methodName + " exception : " + ex.Message);
-                    SendMail sm = new SendMail("Get_r4cSntraxOrchs_SearchByMultipleDN", Environment.MachineName);
+                    SendMail sm = new SendMail(methodName, Environment.MachineName);
                     sm.SendEmail(ex.Message.ToString());
                 }
                 stopwatch.Stop();
