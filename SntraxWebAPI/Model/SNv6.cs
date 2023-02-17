@@ -1,13 +1,10 @@
 ﻿using Newtonsoft.Json;
+using SntraxWebAPI.Model;
 using System.ComponentModel;
 using System.Xml.Serialization;
 
 namespace SntraxWebAPI.Model
 {
-    public class Body
-    {
-        public UploadSNv6 UploadSNv6 { get; set; }
-    }
 
     //public class Component
     //{
@@ -84,12 +81,11 @@ namespace SntraxWebAPI.Model
     public class ComponentList
     {
         public List<Component> Component { get; set; }
-    }
-
-        public static implicit operator ComponentList(List<Components> v)
-        {
-            throw new NotImplementedException();
-        }
+    
+        //public static implicit operator ComponentList(List<Components> v)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 
     public class EnvelopeSNV
@@ -134,8 +130,5 @@ namespace SntraxWebAPI.Model
     {
         public SNv6List SNv6List { get; set; }
     }
-
-
-
 
 }
