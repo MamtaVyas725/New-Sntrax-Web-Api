@@ -289,7 +289,7 @@ namespace SntraxWebAPI.Controllers
             var soapBody = doc.GetElementsByTagName("UploadSNv6")[0];
             string innerObject = soapBody.InnerXml;
             var myJsonResponse = Repo.XmlToJson(innerObject);
-            SNv6Root myDeserializedClass = JsonConvert.DeserializeObject<SNv6Root>(myJsonResponse);
+            UploadSNv6 myDeserializedClass = JsonConvert.DeserializeObject<UploadSNv6>(myJsonResponse);
             List<SNv6> SNv6List = myDeserializedClass.SNv6List.SNv6.ToList();
             List<SNv6> _rtnList = new List<SNv6>(); //New list for returning to caller
             DateTime update_dt = DateTime.Now;

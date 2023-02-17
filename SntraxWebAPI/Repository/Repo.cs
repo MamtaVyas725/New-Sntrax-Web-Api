@@ -183,8 +183,8 @@ namespace SntraxWebAPI.Repository
                         cmd.Parameters.AddRange(commandParameters);
                     }
                     cmd.ExecuteNonQuery();
-                    if (cmd.Parameters["@rowCount"].Value != null)
-                        result = Convert.ToInt32(cmd.Parameters["@rowCount"].Value);
+                    //if (cmd.Parameters["@rowCount"].Value != null)
+                    //    result = Convert.ToInt32(cmd.Parameters["@rowCount"].Value);
                     cmd.Parameters.Clear();
                 }
             }
