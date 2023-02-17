@@ -2,6 +2,7 @@
 using SntraxWebAPI.Model;
 using SntraxWebAPI.Model.IBaseData;
 using SntraxWebAPI.Model.SearchByMultipleDN;
+using SntraxWebAPI.Model.ShipData;
 using SntraxWebAPI.Utilities;
 using System.Data;
 using System.Diagnostics;
@@ -124,8 +125,11 @@ namespace SntraxWebAPI.Services
             {
                 returnXmlstring = xmlstring.ToString().Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "").Replace("<ArrayOfCls_OL_DataByMultipleSN xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<Get_r4cSntraxOrchs_SearchByMultipleSNResult>").Replace("</ArrayOfCls_OL_DataByMultipleSN>", "</Get_r4cSntraxOrchs_SearchByMultipleSNResult>");
             }
-
-            return returnXmlstring.ToString();
+            else if (methodName == "UploadSNv6")
+            {
+                returnXmlstring = xmlstring.ToString().Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>", "").Replace("<ArrayOfCls_OL_DataByMultipleSN xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">", "<Get_r4cSntraxOrchs_SearchByMultipleSNResult>").Replace("</ArrayOfCls_OL_DataByMultipleSN>", "</Get_r4cSntraxOrchs_SearchByMultipleSNResult>");
+            }
+            return returnXmlstring;
         }
 
         public List<get_EIMRmaResult> getEIMRmaResult(DataSet dataSet, string SerialNumber)
@@ -274,7 +278,7 @@ namespace SntraxWebAPI.Services
 
             return msg_rtn;
         }
-        public string validateSNv6_comp(Components _component)
+        public string validateSNv6_comp(Component _component)
         {
             string msg_rtn = "";
             if ((_component.IntelPartNumber ?? "").Trim().Length > 15)

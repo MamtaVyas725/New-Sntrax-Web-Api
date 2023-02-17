@@ -165,9 +165,9 @@ namespace SntraxWebAPI.Repository
             return jsonText;
         }
         // INSERT,UPDATE, DELETE
-        public static int ExecuteNonQuery(string connString, string procedureName, params SqlParameter[] commandParameters)
+        public static void ExecuteNonQuery(string connString, string procedureName, params SqlParameter[] commandParameters)
         {
-            int result = -1;
+            //int result = -1;
             try
             {
                 using (SqlConnection conn = new SqlConnection(connString))
@@ -190,10 +190,10 @@ namespace SntraxWebAPI.Repository
             }
             catch (Exception ex)
             {
-                result = -1;
+               // result = -1;
                 throw new Exception(ex.ToString());
             }
-            return result;
+            //return result;
         }
 
     }

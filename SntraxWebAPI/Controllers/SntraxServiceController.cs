@@ -12,8 +12,7 @@ using System.Text.RegularExpressions;
 using SntraxWebAPI.Utilities;
 using SntraxWebAPI.Model.SearchByMultipleDN;
 using SntraxWebAPI.Model.IBaseGetDataByDN;
-
-
+using SntraxWebAPI.Model.ShipData;
 
 namespace SntraxWebAPI.Controllers
 {
@@ -310,7 +309,7 @@ namespace SntraxWebAPI.Controllers
                             _msg = sntraxService.validateSNv6(_SNv6);
                             if (!_msg.Equals(""))
                                 _hasError = '1';
-                            foreach (Components _component in _SNv6.ComponentList.Component)
+                            foreach (Component _component in _SNv6.ComponentList.Component)
                             {
                                 _comp_msg += sntraxService.validateSNv6_comp(_component);
                                 if (!string.IsNullOrWhiteSpace(_comp_msg) && _hasError == '0')
@@ -353,15 +352,15 @@ namespace SntraxWebAPI.Controllers
                         }
                         //Assign _SNv6 to return variables
                         _rtnSNv6 = _SNv6;
-                        //_rtnSNv6._status = _hasError.ToString();
-                        // _rtnSNv6._msg = _msg;
+                        _rtnSNv6._status = _hasError.ToString();
+                         _rtnSNv6._msg = _msg;
 
                         //Temp component list
-                        List<Components> tempComp = new List<Components>();
+                        List<Component> tempComp = new List<Component>();
 
-                        foreach (Components _component in _SNv6.ComponentList.Component)
+                        foreach (Component _component in _SNv6.ComponentList.Component)
                         {
-                            Components _rtnComponent = new Components(); //New return component
+                            Component _rtnComponent = new Component(); //New return component
 
                             try
                             {
@@ -409,7 +408,7 @@ namespace SntraxWebAPI.Controllers
                             tempComp.Add(_rtnComponent);
 
                         }
-                        _rtnSNv6.ComponentList = tempComp;
+                        _rtnSNv6.ComponentList.Component = tempComp;
                         //Add return variable to return list
                         _rtnList.Add(_rtnSNv6);
                     }
@@ -424,7 +423,7 @@ namespace SntraxWebAPI.Controllers
             stopwatch.Stop();
             CLogger.LogInfo(methodName + " completed in : " + stopwatch.Elapsed);
             stringwriter = sntraxService.Serialize(_rtnList);
-            var FinalDNXml1 = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter, ""));
+            var FinalDNXml1 = string.Format(_outerDNXML, sntraxService.ReplaceXmlTag(stringwriter, methodName));
             XmlDocument xdn = new XmlDocument();
             xdn.LoadXml(FinalDNXml1);
             return xdn;

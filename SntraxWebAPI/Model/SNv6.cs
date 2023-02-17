@@ -4,7 +4,10 @@ using System.Xml.Serialization;
 
 namespace SntraxWebAPI.Model
 {
-    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+    public class Body
+    {
+        public UploadSNv6 UploadSNv6 { get; set; }
+    }
 
     //public class Component
     //{
@@ -80,7 +83,8 @@ namespace SntraxWebAPI.Model
 
     public class ComponentList
     {
-        public List<Components> Component { get; set; }
+        public List<Component> Component { get; set; }
+    }
 
         public static implicit operator ComponentList(List<Components> v)
         {
@@ -100,6 +104,8 @@ namespace SntraxWebAPI.Model
 
     public class SNv6
     {
+        internal string _status = "";
+        internal string _msg = "";
         public string Type { get; set; }
         public string Site { get; set; }
         public string SN { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace SntraxWebAPI.Model
+﻿namespace SntraxWebAPI.Model.ShipData
 {
 
     public class Body
